@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include foundryapp *.css
+recursive-include foundryapp *.csv
+recursive-include foundryapp *.html
+recursive-include foundryapp *.ico
+recursive-include foundryapp *.js
+recursive-include foundryapp *.json
+recursive-include foundryapp *.md
+recursive-include foundryapp *.png
+recursive-include foundryapp *.py
+recursive-include foundryapp *.svg
+recursive-include foundryapp *.txt
+recursive-exclude foundryapp *.pyc

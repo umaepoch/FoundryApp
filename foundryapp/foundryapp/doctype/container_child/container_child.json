@@ -1,0 +1,147 @@
+{
+ "creation": "2021-08-16 21:23:33.604246",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer_po_number",
+  "so_no",
+  "item",
+  "pallet_size",
+  "so_qty",
+  "col_break78",
+  "qty_left_in_so",
+  "qty_to_be_filled",
+  "total_quantity_of_item_in_container",
+  "so_date",
+  "initial_delivery_date",
+  "final_destination",
+  "section_break45",
+  "container_warehouse",
+  "scheduled_date",
+  "col_break79",
+  "quantity_invoiced"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "so_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "SO Date"
+  },
+  {
+   "fieldname": "initial_delivery_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Initial Delivery Date"
+  },
+  {
+   "columns": 1,
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "columns": 1,
+   "fieldname": "pallet_size",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Pallet Size"
+  },
+  {
+   "columns": 1,
+   "fieldname": "so_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "SO Qty"
+  },
+  {
+   "columns": 1,
+   "fieldname": "customer_po_number",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Customer PO Number"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty_left_in_so",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty Left in SO"
+  },
+  {
+   "fieldname": "final_destination",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Final Destination",
+   "options": "Port Of Dispatch"
+  },
+  {
+   "fieldname": "container_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Container Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty_to_be_filled",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty to be filled"
+  },
+  {
+   "columns": 1,
+   "fieldname": "total_quantity_of_item_in_container",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Quantity of Item in Container"
+  },
+  {
+   "fieldname": "scheduled_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Scheduled Date"
+  },
+  {
+   "fieldname": "quantity_invoiced",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Quantity Invoiced"
+  },
+  {
+   "fieldname": "section_break45",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "so_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "SO No",
+   "options": "Sales Order"
+  },
+  {
+   "fieldname": "col_break78",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break79",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-08-23 11:20:05.344988",
+ "modified_by": "Administrator",
+ "module": "FoundryApp",
+ "name": "Container Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

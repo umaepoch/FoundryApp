@@ -1,0 +1,77 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2021-08-04 13:30:22.201785",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer",
+  "naming_series",
+  "is_active",
+  "mapping",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "mapping",
+   "fieldtype": "Table",
+   "label": "Mapping",
+   "options": "Mapping",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Port Mapping",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "PORT-MAP-.YYYY.-",
+   "reqd": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-08-17 16:35:09.879973",
+ "modified_by": "Administrator",
+ "module": "FoundryApp",
+ "name": "Port Mapping",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
