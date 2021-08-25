@@ -162,3 +162,36 @@ frappe.ui.form.on("Container", "validate", function(frm, cdt, cdn) {
 		}
 	})
 });
+
+frappe.ui.form.on("Container", "refresh", function(frm ,cdt , cdn){
+	frappe.ui.form.on("Container Child", {
+		so_qty : function(frm, cdt , cdn){
+			//cur_frm.refresh_field("container_details")
+			var d = locals[cdt][cdn];
+			var so_qty = d.so_qty;
+			var pallet_size = d.pallet_size;
+			var qty_to_be_filled=d.qty_to_be_filled;
+			if(d.so_qty%d.pallet_size!=0){
+			console.log("enterd in for loop",d.so_qty);
+			frappe.msgprint("So Qty must be multiple of Pallet Size.Please correct Row"+ '"'+d.idx+'"'+"  ")
+			
+		}
+	}
+})
+});
+frappe.ui.form.on("Container", "refresh", function(frm ,cdt , cdn){
+	frappe.ui.form.on("Container Child", {
+		qty_to_be_filled : function(frm, cdt , cdn){
+			//cur_frm.refresh_field("container_details")
+			var d = locals[cdt][cdn];
+			var so_qty = d.so_qty;
+			var pallet_size = d.pallet_size;
+			var qty_to_be_filled=d.qty_to_be_filled;
+			if(d.qty_to_be_filled%d.pallet_size!=0){
+			console.log("enterd in for loop",d.so_qty);
+			frappe.msgprint("Qty To Be Filled must be multiple of Pallet Size.Please correct Row"+ '"'+d.idx+'"'+"  ")
+			
+		}
+	}
+})
+});

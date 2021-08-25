@@ -12,7 +12,7 @@ class Container(Document):
 
 @frappe.whitelist()
 def fetch_so_details(foreign_buyer, final_destination):
-	so_details = []
+	# so_details = []
 	try:
 		# if show_dispatch_items == '1':
 		# 	so_details = frappe.db.sql("""select tso.name, tso.po_no, tso.foreign_buyer_name, tso.final_destination,
@@ -27,6 +27,7 @@ def fetch_so_details(foreign_buyer, final_destination):
 		# 							order by tso.po_no """,(foreign_buyer, final_destination), as_dict=1)
 		#
 		# elif show_dispatch_items == '0':
+		print(foreign_buyer,final_destination)
 		so_details = frappe.db.sql("""select tso.name, tso.po_no, tso.foreign_buyer_name, tso.final_destination,
 									tsi.item_code, tsi.pch_pallet_size, tsi.qty, tso.transaction_date, tsi.delivery_date
 									from `tabSales Order Item` as tsi
