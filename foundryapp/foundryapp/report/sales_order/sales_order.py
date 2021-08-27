@@ -67,40 +67,57 @@ def fetch_invoice_items_report(week):
 def generate_qty_plan(data, filters):
 	if filters.get("show_dispatch_items") == 1:
 		for d in data:
-			query = frappe.db.sql("""select tcc.parent, tbi.item_code, truncate(tcc.so_qty*tbi.qty/tb.quantity,0) as so_qty,
+			query = frappe.db.sql("""select tcc.parent, tbi.item_code, truncate(tcc.qty_left_in_so*tbi.qty/tb.quantity,0) as qty_left_in_so,
 									truncate(tcc.qty_to_be_filled*tbi.qty/tb.quantity, 0) as qty_to_be_filled
 									from `tabContainer Child` as tcc
 									join `tabContainer` as tc on tcc.parent = tc.name
 									join `tabBOM` as tb on tcc.item =tb.item
 									join `tabBOM Item` as tbi on tb.name = tbi.parent
-									where (tc.foreign_buyer=%s and tc.final_destination=%s) and (tbi.item_code=%s and tcc.so_no=%s) and tb.is_default=1""",
+									where (tc.foreign_buyer=%s and tc.final_destination=%s) and (tbi.item_code=%s and tcc.so_no=%s)
+									and (tb.is_default=1 and (tc.document_status='Being Worked Upon' or tc.document_status='Finalized'))""",
 									(d['foreign_buyer_name'], d['final_destination'], d['item_code'], d['name']), as_dict=1)
 			# print(query)
 			if len(query) > 0:
 				for q in query:
 					d['Quantity Planned in Containers'] = q['qty_to_be_filled']
-					d['Quantity not Planned in Containers'] = q['so_qty'] - q['qty_to_be_filled']
+					d['Quantity not Planned in Containers'] = q['qty_left_in_so']
 
 			if len(query) == 0:
-				d['Quantity Planned in Containers'] = 0
-				d['Quantity not Planned in Containers'] = 0
+				no_container = frappe.db.sql(""" select tsi.qty as qty_left_in_so
+											from `tabSales Order Item` as tsi
+											join `tabSales Order` as tso on tsi.parent = tso.name
+											join `tabBOM` as tb on tsi.item_code = tb.item
+											join `tabBOM Item` as tbi on tb.name = tbi.parent
+											join `tabItem` as ti on ti.item_code = tbi.item_code
+											where tbi.item_code=%s and tsi.parent=%s and ti.pch_made=1""",
+											(d['item_code'], d['name']), as_dict=1)
+				for nc in no_container:
+					d['Quantity Planned in Containers'] = 0
+					d['Quantity not Planned in Containers'] = nc['qty_left_in_so']
 
 	if filters.get("show_dispatch_items") is None:
 		for d in data:
-			query = frappe.db.sql("""select tcc.parent, tcc.so_no, tcc.item, tcc.so_qty, tcc.qty_to_be_filled
+			query = frappe.db.sql("""select tcc.parent, tcc.so_no, tcc.item, tcc.qty_left_in_so, tcc.qty_to_be_filled
 									from `tabContainer Child` as tcc
 									join `tabContainer` as tc on tcc.parent = tc.name
-									where (tc.foreign_buyer=%s and tc.final_destination=%s) and (tcc.item=%s and tcc.so_no=%s)""",
+									where (tc.foreign_buyer=%s and tc.final_destination=%s) and (tcc.item=%s and tcc.so_no=%s)
+									and (tc.document_status='Being Worked Upon' or tc.document_status='Finalized')""",
 									(d['foreign_buyer_name'], d['final_destination'], d['item_code'], d['name']), as_dict=1)
-			print(query)
+			# print(query)
 			if len(query) > 0:
 				for q in query:
 					d['Quantity Planned in Containers'] = q['qty_to_be_filled']
-					d['Quantity not Planned in Containers'] = q['so_qty'] - q['qty_to_be_filled']
+					d['Quantity not Planned in Containers'] = q['qty_left_in_so']
 
 			if len(query) == 0:
-				d['Quantity Planned in Containers'] = 0
-				d['Quantity not Planned in Containers'] = 0
+				no_container = frappe.db.sql(""" select tsi.qty as qty_left_in_so
+											from `tabSales Order Item` as tsi
+											join `tabSales Order` as tso on tsi.parent = tso.name
+											where tsi.item_code =%s and tsi.parent =%s""",
+											(d['item_code'], d['name']), as_dict=1)
+				for nc in no_container:
+					d['Quantity Planned in Containers'] = 0
+					d['Quantity not Planned in Containers'] = nc['qty_left_in_so']
 
 	return data
 

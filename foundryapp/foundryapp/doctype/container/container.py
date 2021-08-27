@@ -6,38 +6,63 @@ from __future__ import unicode_literals
 # import frappe
 from frappe.model.document import Document
 import frappe
+import json
 
 class Container(Document):
 	pass
 
 @frappe.whitelist()
-def fetch_so_details(foreign_buyer, final_destination):
-	# so_details = []
+def fetch_so_details(document, foreign_buyer, final_destination):
 	try:
-		# if show_dispatch_items == '1':
-		# 	so_details = frappe.db.sql("""select tso.name, tso.po_no, tso.foreign_buyer_name, tso.final_destination,
-		# 							tbi.item_code, tsi.pch_pallet_size, tsi.qty,tso.transaction_date, tsi.delivery_date
-		# 							from `tabSales Order Item` as tsi
-		# 							join `tabSales Order` as tso on tso.name = tsi.parent
-		# 							join `tabBOM` as tb on tsi.item_code = tb.item
-		# 							join `tabBOM Item` as tbi on tb.name = tbi.parent
-		# 							join `tabItem` as ti on ti.item_code = tbi.item_code
-		# 							where ti.pch_made=1 and tso.foreign_buyer_name=%s
-		# 							and tso.final_destination=%s
-		# 							order by tso.po_no """,(foreign_buyer, final_destination), as_dict=1)
-		#
-		# elif show_dispatch_items == '0':
-		print(foreign_buyer,final_destination)
+		date_format = "%d-%m-%Y"
 		so_details = frappe.db.sql("""select tso.name, tso.po_no, tso.foreign_buyer_name, tso.final_destination,
-									tsi.item_code, tsi.pch_pallet_size, tsi.qty, tso.transaction_date, tsi.delivery_date
+									tsi.item_code, tsi.pch_pallet_size, tsi.qty, tsi.quantity_left_in_so,
+									date_format(tso.transaction_date, %s) as transaction_date,
+									date_format(tsi.delivery_date, %s) as  delivery_date
 									from `tabSales Order Item` as tsi
 									join `tabSales Order` as tso on tso.name = tsi.parent
 									join `tabItem` as ti on ti.item_code = tsi.item_code
 									where ti.pch_made=1 and tso.foreign_buyer_name=%s
 									and tso.final_destination=%s
-									order by tso.po_no,tsi.item_code""",(foreign_buyer, final_destination), as_dict = 1)
-		return so_details
+									order by tso.po_no,tsi.item_code""",
+									(date_format, date_format,foreign_buyer, final_destination),
+									as_dict = 1)
+
+
+		if document == 'Sales Order':
+			print(" ")
+			print("entered condition for sales order report.............")
+			print(so_details)
+			container = {
+			'foreign_buyer': foreign_buyer,
+			'final_destination': final_destination,
+			'container_details': []
+			}
+
+			for sd in so_details:
+				child = {
+					'so_no': sd.name,
+					'item': sd.item_code,
+					'pallet_size': sd.pch_pallet_size,
+					'so_qty': sd.qty,
+					'final_destination': sd.final_destination,
+					'customer_po_number': sd.po_no,
+					'so_date': sd.delivery_date,
+					'initial_delivery_date': sd.transaction_date
+				}
+				print("child : ", child)
+				container['container_details'].append(child)
+
+			# doc = frappe.new_doc('Container')
+			# doc.update(outerjson)
+			print("Container : ", container)
+			print(" ")
+			return container
+
+		if document == 'Container':
+			return so_details
 	except Exception as ex:
+		print(ex)
 		return ex
 
 @frappe.whitelist()
@@ -53,4 +78,39 @@ def validate_container_exist(foreign_buyer, final_destination):
 		return cont
 	except Exception as ex:
 		print(ex)
+		return ex
+
+@frappe.whitelist()
+def get_container_dispatch_items(so_no, item_code, parent):
+	try:
+		dispatch = frappe.db.sql(""" select tcc.item, tcc.pallet_size,
+								tcc.total_quantity_of_item_in_container as quantity_planned_in_container,
+								tbi.item_code as dispatch_items,
+								tcc.total_quantity_of_item_in_container as quantity
+								from `tabContainer Child` as tcc
+								join `tabContainer` as tc on tcc.parent = tc.name
+								join `tabBOM` as tb on tcc.item =tb.item
+								join `tabBOM Item` as tbi on tb.name = tbi.parent
+								join `tabItem` as ti on ti.item_code = tbi.item_code
+								where (ti.pch_made=1 and tcc.item=%s) and (tcc.so_no=%s and tcc.parent=%s)""",
+								(item_code, so_no, parent), as_dict=1)
+		return dispatch
+	except Exception as e:
+		raise
+
+
+@frappe.whitelist()
+def update_so_for_qty(so_no, item, so_qty_left):
+	try:
+		updated_quantity = 0
+		doc = frappe.get_doc('Sales Order', so_no)
+		flag = 1
+		for d in doc.items:
+			if d.item_code == item:
+					d.quantity_left_in_so = so_qty_left
+					updated_quantity = d.quantity_left_in_so
+					flag = 0
+		doc.save()
+		return {"updated_quantity": updated_quantity}
+	except Exception as ex:
 		return ex
