@@ -1,0 +1,86 @@
+{
+ "creation": "2021-08-26 14:34:16.038155",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "invoice_item",
+  "pallet_size",
+  "quantity_planned_in_container",
+  "dispatch_item",
+  "quantity",
+  "col_brk68",
+  "total_inward_transactions_of_dispatch_item",
+  "quantity_returned_to_allocation_warehouse",
+  "quantity_invoiced",
+  "current_quantity_in_container_warehouse"
+ ],
+ "fields": [
+  {
+   "fieldname": "invoice_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Invoice Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "pallet_size",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Pallet Size"
+  },
+  {
+   "fieldname": "quantity_planned_in_container",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Quantity Planned in Container"
+  },
+  {
+   "fieldname": "dispatch_item",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Dispatch Item"
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Quantity"
+  },
+  {
+   "fieldname": "total_inward_transactions_of_dispatch_item",
+   "fieldtype": "Data",
+   "label": "Total Inward Transactions of Dispatch Item"
+  },
+  {
+   "fieldname": "quantity_returned_to_allocation_warehouse",
+   "fieldtype": "Data",
+   "label": "Quantity Returned to Allocation Warehouse"
+  },
+  {
+   "fieldname": "quantity_invoiced",
+   "fieldtype": "Data",
+   "label": "Quantity Invoiced"
+  },
+  {
+   "fieldname": "current_quantity_in_container_warehouse",
+   "fieldtype": "Data",
+   "label": "Current Quantity in Container Warehouse"
+  },
+  {
+   "fieldname": "col_brk68",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-08-26 14:38:19.836540",
+ "modified_by": "Administrator",
+ "module": "FoundryApp",
+ "name": "Dispatch Items",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

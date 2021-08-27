@@ -1,120 +1,131 @@
 {
- "autoname": "naming_series:",
- "creation": "2021-08-17 16:40:28.129656",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "naming_series",
-  "foreign_buyer",
-  "final_destination",
-  "container_status",
-  "column_break1",
-  "warehouse",
-  "document_status",
-  "scheduled_date",
-  "section_break1",
-  "fetch_sales_order_data",
-  "container_details",
-  "section_break12",
-  "total_planned_net_weight_of_container"
- ],
- "fields": [
-  {
-   "fieldname": "foreign_buyer",
-   "fieldtype": "Link",
-   "label": "Foreign Buyer",
-   "options": "Customer",
-   "reqd": 1
-  },
-  {
-   "fieldname": "final_destination",
-   "fieldtype": "Link",
-   "label": "Final Destination",
-   "options": "Port Of Dispatch",
-   "reqd": 1
-  },
-  {
-   "fieldname": "warehouse",
-   "fieldtype": "Link",
-   "label": "Warehouse",
-   "options": "Warehouse",
-   "reqd": 1
-  },
-  {
-   "fieldname": "document_status",
-   "fieldtype": "Select",
-   "label": "Document Status",
-   "options": "Not Started\nBeing Worked Upon\nFinalized"
-  },
-  {
-   "fieldname": "scheduled_date",
-   "fieldtype": "Date",
-   "label": "Scheduled Date"
-  },
-  {
-   "fieldname": "container_details",
-   "fieldtype": "Table",
-   "label": "Container Details",
-   "options": "Container Child"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Container Number",
-   "options": "CONT-",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break1",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "section_break12",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "total_planned_net_weight_of_container",
-   "fieldtype": "Float",
-   "label": "Total Planned Net Weight of Container"
-  },
-  {
-   "fieldname": "fetch_sales_order_data",
-   "fieldtype": "Button",
-   "label": "Fetch Sales Order Data"
-  },
-  {
-   "fieldname": "container_status",
-   "fieldtype": "Select",
-   "label": "Container Status",
-   "options": "Yet to Start\nBeing Filled\nFilled but not Invoiced\nInvoiced but not Dispatched\nDispatched"
-  }
- ],
- "modified": "2021-08-23 15:23:35.838987",
- "modified_by": "Administrator",
- "module": "FoundryApp",
- "name": "Container",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "track_changes": 1
-}
+    "autoname": "naming_series:",
+    "creation": "2021-08-17 16:40:28.129656",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+     "naming_series",
+     "foreign_buyer",
+     "final_destination",
+     "container_status",
+     "column_break1",
+     "warehouse",
+     "document_status",
+     "scheduled_date",
+     "section_break1",
+     "fetch_sales_order_data",
+     "container_details",
+     "section_break12",
+     "dispatch_items",
+     "sec_brk56",
+     "total_planned_net_weight_of_container"
+    ],
+    "fields": [
+     {
+      "fieldname": "foreign_buyer",
+      "fieldtype": "Link",
+      "label": "Foreign Buyer",
+      "options": "Customer",
+      "reqd": 1
+     },
+     {
+      "fieldname": "final_destination",
+      "fieldtype": "Link",
+      "label": "Final Destination",
+      "options": "Port Of Dispatch",
+      "reqd": 1
+     },
+     {
+      "fieldname": "warehouse",
+      "fieldtype": "Link",
+      "label": "Warehouse",
+      "options": "Warehouse"
+     },
+     {
+      "fieldname": "document_status",
+      "fieldtype": "Select",
+      "label": "Document Status",
+      "options": "Not Started\nBeing Worked Upon\nFinalized"
+     },
+     {
+      "fieldname": "scheduled_date",
+      "fieldtype": "Date",
+      "label": "Scheduled Date"
+     },
+     {
+      "fieldname": "container_details",
+      "fieldtype": "Table",
+      "label": "Container Details",
+      "options": "Container Child"
+     },
+     {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Container Number",
+      "options": "CONT-",
+      "reqd": 1
+     },
+     {
+      "fieldname": "column_break1",
+      "fieldtype": "Column Break"
+     },
+     {
+      "fieldname": "section_break1",
+      "fieldtype": "Section Break"
+     },
+     {
+      "fieldname": "section_break12",
+      "fieldtype": "Section Break"
+     },
+     {
+      "fieldname": "total_planned_net_weight_of_container",
+      "fieldtype": "Float",
+      "label": "Total Planned Net Weight of Container"
+     },
+     {
+      "fieldname": "fetch_sales_order_data",
+      "fieldtype": "Button",
+      "label": "Fetch Sales Order Data"
+     },
+     {
+      "fieldname": "container_status",
+      "fieldtype": "Select",
+      "label": "Container Status",
+      "options": "Yet to Start\nBeing Filled\nFilled but not Invoiced\nInvoiced but not Dispatched\nDispatched"
+     },
+     {
+      "fieldname": "dispatch_items",
+      "fieldtype": "Table",
+      "label": "Dispatch Items",
+      "options": "Dispatch Items"
+     },
+     {
+      "fieldname": "sec_brk56",
+      "fieldtype": "Section Break"
+     }
+    ],
+    "modified": "2021-08-26 21:37:17.300363",
+    "modified_by": "Administrator",
+    "module": "FoundryApp",
+    "name": "Container",
+    "owner": "Administrator",
+    "permissions": [
+     {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+     }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "track_changes": 1
+   }
