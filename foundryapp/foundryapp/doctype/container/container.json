@@ -33,7 +33,7 @@
       "fieldname": "final_destination",
       "fieldtype": "Link",
       "label": "Final Destination",
-      "options": "Port Of Dispatch",
+      "options": "Ports",
       "reqd": 1
      },
      {

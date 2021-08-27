@@ -18,7 +18,7 @@ frappe.query_reports["Sales Order"] = {
 			"fieldname": "final_destination",
 			"label": __("Final Destination"),
 			"fieldtype": "Link",
-			"options": "Port Of Dispatch"
+			"options": "Ports"
 		}
 	],
 	onload: function(report) {
@@ -43,7 +43,7 @@ frappe.query_reports["Sales Order"] = {
 						"fieldname": "final_destination",
 						"label": __("Final Destination"),
 						"fieldtype": "Link",
-						"options": "Port Of Dispatch",
+						"options": "Ports",
         				"reqd": 1,
 					},
 				],
