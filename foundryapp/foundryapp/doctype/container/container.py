@@ -14,18 +14,18 @@ class Container(Document):
 @frappe.whitelist()
 def fetch_so_details(document, foreign_buyer, final_destination):
 	try:
-		date_format = "%d-%m-%Y"
+		# date_format = "%d-%m-%Y"
 		so_details = frappe.db.sql("""select tso.name, tso.po_no, tso.foreign_buyer_name, tso.final_destination,
 									tsi.item_code, tsi.pch_pallet_size, tsi.qty, tsi.quantity_left_in_so,
-									date_format(tso.transaction_date, %s) as transaction_date,
-									date_format(tsi.delivery_date, %s) as  delivery_date
+									tso.transaction_date,
+									tsi.delivery_date
 									from `tabSales Order Item` as tsi
 									join `tabSales Order` as tso on tso.name = tsi.parent
 									join `tabItem` as ti on ti.item_code = tsi.item_code
 									where ti.pch_made=1 and tso.foreign_buyer_name=%s
 									and tso.final_destination=%s
 									order by tso.po_no,tsi.item_code""",
-									(date_format, date_format,foreign_buyer, final_destination),
+									(foreign_buyer, final_destination),
 									as_dict = 1)
 
 
