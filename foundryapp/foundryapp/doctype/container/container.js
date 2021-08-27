@@ -195,3 +195,62 @@ frappe.ui.form.on("Container", "refresh", function(frm ,cdt , cdn){
 	}
 })
 });
+
+frappe.ui.form.on("Container","validate", function(frm ,cdt , cdn)
+{   
+        var is_pch_matching=true;
+        var d = locals[cdt][cdn];
+	    var container_child = frm.doc.container_details;
+	    for (var i = 0; i < container_child.length; i++) 
+        {
+            var so_number = container_child[i]['so_no'];
+            console.log("selected sales order number",so_number);
+            var pch_po_type=fetch_pch_details(so_number);
+            
+            if(i==0)
+                {
+                 var po_status=pch_po_type.pch_po_type;
+                }
+                console.log("pch_po_type ",pch_po_type);
+            if(pch_po_type.pch_po_type!==po_status)
+                {
+               frappe.msgprint("You Cannot Save the Container");
+               
+                is_pch_matching=false;
+                 frappe.validated = false;
+                break;
+                
+                }
+        }
+            if(is_pch_matching)
+             {
+             frappe.msgprint("your Container is Saved"); 
+            frappe.validated = true;
+             }
+       });
+
+function fetch_pch_details(so_number)
+{   
+    console.log("entered into function");
+    var fetched_pch_po_type= "";
+    frappe.call({
+     method: 'frappe.client.get_value',
+        args: {
+            'doctype': 'Sales Order',
+            'fieldname': 'pch_po_type',
+            
+            'filters': {
+               'name':so_number,
+                            }
+        },
+        async: false,
+        callback: function(r) {
+            if (r.message) {
+                fetched_pch_po_type = r.message;
+                console.log("readings-----------" + JSON.stringify(r.message));
+
+            }
+        }
+    });
+    return fetched_pch_po_type;
+}
