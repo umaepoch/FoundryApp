@@ -72,7 +72,7 @@ function fetch_so_details(foreign_buyer,final_destination, cdt)
     return selected_so;
 }
 
-frappe.ui.form.on("Container Child", "qty_to_be_filled", function(frm, cdt, cdn){
+/*frappe.ui.form.on("Container Child", "qty_to_be_filled", function(frm, cdt, cdn){
   var child = locals[cdt][cdn]
   var qty_to_be_filled = child.qty_to_be_filled
   var qty_left_in_so = child.qty_left_in_so
@@ -87,7 +87,7 @@ frappe.ui.form.on("Container Child", "qty_to_be_filled", function(frm, cdt, cdn)
     update_so_qty_left(so_no, item, so_qty_left)
   }
 
-})
+})*/
 
 frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn){
   var container = locals[cdt][cdn]
@@ -190,7 +190,7 @@ frappe.ui.form.on("Container", "validate", function(frm, cdt, cdn) {
 	})
 });
 
-frappe.ui.form.on("Container", "before_save", function(frm, cdt, cdn) {
+frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn) {
   var cont = locals[cdt][cdn]
   var container_child = cont.container_details
   // console.log(container_child)
