@@ -84,12 +84,7 @@ frappe.ui.form.on("Container Child", "qty_to_be_filled", function(frm, cdt, cdn)
     let so_no = child.so_no
     let item = child.item
     let so_qty_left = child.qty_left_in_so - child.qty_to_be_filled
-    let flag = update_so_qty_left(so_no, item, so_qty_left)
-    // console.log(flag)
-    if (flag.updated_quantity) {
-      console.log(flag.updated_quantity)
-      frappe.model.set_value(child.doctype, child.name, "qty_left_in_so",flag['updated_quantity']);
-    }
+    update_so_qty_left(so_no, item, so_qty_left)
   }
 
 })
@@ -115,8 +110,12 @@ frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn){
   container.total_planned_net_weight_of_container = sum_quantiy
   // console.log(sum_quantiy)
 
-
 });
+
+frappe.ui.form.on("Container Child", "validate", function(frm, cdt, cdn) {
+  var child = locals[cdt][cdn]
+  console.log(child)
+})
 
 function fetch_item_weight(item_code) {
   var weight;
@@ -196,20 +195,22 @@ frappe.ui.form.on("Container", "before_save", function(frm, cdt, cdn) {
   var container_child = cont.container_details
   // console.log(container_child)
   container_child.forEach((child) => {
+    console.log("entering child loop")
     let so_no = child.so_no
     let item_code = child.item
     let parent = child.parent
 
-    let dispatch = fetch_dispatch(so_no, item_code, parent)
+    let dispatch = fetch_dispatch(so_no, item_code)
     dispatch.forEach((details) => {
+      console.log("entering dispatch loo")
       var child = cur_frm.add_child("dispatch_items");
       frappe.model.set_value(child.doctype, child.name, "invoice_item",details['item']);
       frappe.model.set_value(child.doctype, child.name, "pallet_size",details['pallet_size']);
       frappe.model.set_value(child.doctype, child.name, "quantity_planned_in_container",details['quantity_planned_in_container']);
-	    frappe.model.set_value(child.doctype, child.name, "dispatch_item",details['dispatch_items']);
-		  frappe.model.set_value(child.doctype, child.name, "quantity",details['quantity']);
+      frappe.model.set_value(child.doctype, child.name, "dispatch_item",details['dispatch_items']);
+      frappe.model.set_value(child.doctype, child.name, "quantity",details['quantity']);
 
-	    // cur_frm.refresh_field("dispatch_items");
+      // cur_frm.refresh_field("dispatch_items");
     });
   })
 })
@@ -234,120 +235,40 @@ function fetch_dispatch(so_no, item_code, parent) {
   return items
 }
 
-frappe.ui.form.on("Container","validate", function(frm ,cdt , cdn)
+frappe.ui.form.on("Container","after_save", function(frm ,cdt , cdn)
 {
-        var is_pch_matching=true;
         var d = locals[cdt][cdn];
+        var parent=frm.doc.name;
 	    var container_child = frm.doc.container_details;
+	   
+	    var item="";
 	    for (var i = 0; i < container_child.length; i++)
         {
-            var so_number = container_child[i]['so_no'];
-            console.log("selected sales order number",so_number);
-            var pch_po_type=fetch_pch_details(so_number);
+             
+            item=container_child[i].item;
+          
+           var qty=sum_of_qty(parent, item);
+           console.log("qty",qty);
+         
+          container_child[i].total_quantity_of_item_in_container=qty;
+	}//end of for loop
+});
 
-            if(i==0)
-                {
-                 var po_status=pch_po_type.pch_po_type;
-                }
-                console.log("pch_po_type ",pch_po_type);
-            if(pch_po_type.pch_po_type!==po_status)
-                {
-               frappe.msgprint("You Cannot Save the Container");
-
-                is_pch_matching=false;
-                 frappe.validated = false;
-                break;
-
-                }
-        }
-            if(is_pch_matching)
-             {
-             frappe.msgprint("your Container is Saved");
-            frappe.validated = true;
-             }
-       });
-
-function fetch_pch_details(so_number)
-{
-    console.log("entered into function");
-    var fetched_pch_po_type= "";
-    frappe.call({
-     method: 'frappe.client.get_value',
-        args: {
-            'doctype': 'Sales Order',
-            'fieldname': 'pch_po_type',
-
-            'filters': {
-               'name':so_number,
-                            }
-        },
-        async: false,
-        callback: function(r) {
-            if (r.message) {
-                fetched_pch_po_type = r.message;
-                console.log("readings-----------" + JSON.stringify(r.message));
-
-            }
-        }
-    });
-    return fetched_pch_po_type;
-}
-
-frappe.ui.form.on("Container","validate", function(frm ,cdt , cdn)
-{   
-        var is_pch_matching=true;
-        var d = locals[cdt][cdn];
-	    var container_child = frm.doc.container_details;
-	    for (var i = 0; i < container_child.length; i++) 
-        {
-            var so_number = container_child[i]['so_no'];
-            console.log("selected sales order number",so_number);
-            var pch_po_type=fetch_pch_details(so_number);
-            
-            if(i==0)
-                {
-                 var po_status=pch_po_type.pch_po_type;
-                }
-                console.log("pch_po_type ",pch_po_type);
-            if(pch_po_type.pch_po_type!==po_status)
-                {
-               frappe.msgprint("You Cannot Save the Container");
-               
-                is_pch_matching=false;
-                 frappe.validated = false;
-                break;
-                
-                }
-        }
-            if(is_pch_matching)
-             {
-             frappe.msgprint("your Container is Saved"); 
-            frappe.validated = true;
-             }
-       });
-
-function fetch_pch_details(so_number)
-{   
-    console.log("entered into function");
-    var fetched_pch_po_type= "";
-    frappe.call({
-     method: 'frappe.client.get_value',
-        args: {
-            'doctype': 'Sales Order',
-            'fieldname': 'pch_po_type',
-            
-            'filters': {
-               'name':so_number,
-                            }
-        },
-        async: false,
-        callback: function(r) {
-            if (r.message) {
-                fetched_pch_po_type = r.message;
-                console.log("readings-----------" + JSON.stringify(r.message));
-
-            }
-        }
-    });
-    return fetched_pch_po_type;
+function sum_of_qty(parent, item) {
+  var qty;
+  frappe.call({
+    method: 'foundryapp.foundryapp.doctype.container.container.qty_sum',
+    args: {
+      "parent": parent,
+      "item": item
+    },
+    async: false,
+    callback: function(r) {
+      if(r.message){
+        // console.log(r.message[0]["name"])
+        qty = r.message
+      }
+    }
+  })
+  return qty
 }

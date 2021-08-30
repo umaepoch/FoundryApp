@@ -114,3 +114,10 @@ def update_so_for_qty(so_no, item, so_qty_left):
 		return {"updated_quantity": updated_quantity}
 	except Exception as ex:
 		return ex
+
+@frappe.whitelist()
+def qty_sum(parent,item):
+	sum_of_quantity = frappe.db.sql("""select sum(qty_to_be_filled) as total_qty from `tabContainer Child`
+								where parent=%s and item=%s""",
+							(parent, item), as_dict=1)
+	return sum_of_quantity[0].total_qty
