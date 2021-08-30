@@ -190,7 +190,7 @@ frappe.ui.form.on("Container", "validate", function(frm, cdt, cdn) {
 	})
 });
 
-frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn) {
+frappe.ui.form.on("Container", "fetch_dispatch_items", function(frm, cdt, cdn) {
   var cont = locals[cdt][cdn]
   var container_child = cont.container_details
   // console.log(container_child)
@@ -200,7 +200,7 @@ frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn) {
     let item_code = child.item
     let parent = child.parent
 
-    let dispatch = fetch_dispatch(so_no, item_code)
+    let dispatch = fetch_dispatch(so_no, item_code,parent)
     dispatch.forEach((details) => {
       console.log("entering dispatch loo")
       var child = cur_frm.add_child("dispatch_items");
