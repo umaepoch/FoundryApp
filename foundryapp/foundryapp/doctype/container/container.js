@@ -190,9 +190,9 @@ frappe.ui.form.on("Container", "validate", function(frm, cdt, cdn) {
 	})
 });
 
-frappe.ui.form.on("Container", "fetch_dispatch_items", function(frm, cdt, cdn) {
+frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn) {
   var cont = locals[cdt][cdn]
-  var container_child = cont.container_details
+  var container_child = cont.container_details;
   // console.log(container_child)
   container_child.forEach((child) => {
     console.log("entering child loop")
