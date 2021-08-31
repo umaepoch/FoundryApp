@@ -194,6 +194,7 @@ frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn) {
   var cont = locals[cdt][cdn]
   var container_child = cont.container_details;
   // console.log(container_child)
+  cur_frm.clear_table("dispatch_items");
   container_child.forEach((child) => {
     console.log("entering child loop")
     let so_no = child.so_no
