@@ -175,7 +175,7 @@ frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn) {
       sum_quantiy += total_qty
   } //end of for loop
   sum_quantiy = sum_quantiy / 1000
-  container.total_planned_net_weight_of_container = sum_quantiy
+  d.total_planned_net_weight_of_container = sum_quantiy
     
 });
 
