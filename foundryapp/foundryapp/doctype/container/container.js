@@ -72,7 +72,7 @@ function fetch_so_details(foreign_buyer,final_destination, cdt)
     return selected_so;
 }
 
-/*frappe.ui.form.on("Container Child", "qty_to_be_filled", function(frm, cdt, cdn){
+frappe.ui.form.on("Container Child", "qty_to_be_filled", function(frm, cdt, cdn){
   var child = locals[cdt][cdn]
   var qty_to_be_filled = child.qty_to_be_filled
   var qty_left_in_so = child.qty_left_in_so
@@ -87,7 +87,7 @@ function fetch_so_details(foreign_buyer,final_destination, cdt)
     update_so_qty_left(so_no, item, so_qty_left)
   }
 
-})*/
+})
 
 frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn){
   var container = locals[cdt][cdn]
@@ -272,3 +272,47 @@ function sum_of_qty(parent, item) {
   })
   return qty
 }
+
+frappe.ui.form.on("Container","after_save", function(frm ,cdt , cdn)
+{
+        var d = locals[cdt][cdn];
+		var parent=frm.doc.name;
+		var foreign_buyer = d.foreign_buyer;
+    	var final_destination = d.final_destination;
+	    var container_child = frm.doc.container_details;
+	   
+		var item="";
+		var so_no="";
+	    for (var i = 0; i < container_child.length; i++)
+        {
+             
+            item=container_child[i].item;
+          so_no=container_child[i].so_no;
+           var quantity=qty_in_container(foreign_buyer,final_destination,so_no,item);
+           console.log("quantity",quantity);
+         
+		  container_child[i]['so_quantity_not_placed_in_containers_before_this_container']=quantity;
+		  container_child[i]['so_quantity_not_placed_in_containers_after_this_container']=container_child[i]['qty_left_in_so'];
+	}//end of for loop
+});
+
+function qty_in_container(foreign_buyer,final_destination,so_no,item) {
+	var qty;
+	frappe.call({
+	  method: 'foundryapp.foundryapp.doctype.container.container.container_details',
+	  args: {
+		"foreign_buyer": foreign_buyer,
+		"final_destination": final_destination,
+		"so_no":so_no,
+		"item":item,
+	  },
+	  async: false,
+	  callback: function(r) {
+		if(r.message){
+		  // console.log(r.message[0]["name"])
+		  qty = r.message
+		}
+	  }
+	})
+	return qty
+  }

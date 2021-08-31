@@ -121,3 +121,25 @@ def qty_sum(parent,item):
 								where parent=%s and item=%s""",
 							(parent, item), as_dict=1)
 	return sum_of_quantity[0].total_qty
+
+@frappe.whitelist()
+def container_details(foreign_buyer,final_destination,so_no,item):
+	sum_of_quantity = frappe.db.sql("""select 
+	 tcc.so_qty as so_qty
+	 from `tabContainer Child` as tcc 
+	join `tabContainer` as tc on tcc.parent = tc.name
+	where tc.foreign_buyer=%s and tc.final_destination=%s and tcc.so_no=%s and tcc.item=%s""",
+							(foreign_buyer,final_destination,so_no,item), as_dict=1)
+	print("sum of qty",sum_of_quantity)
+	if len(sum_of_quantity)==1:
+		return sum_of_quantity[0]['so_qty']
+	else:
+		print("entered in else")
+		sum_of_quantity = frappe.db.sql("""select 
+		tcc.qty_left_in_so as so_qty
+		from `tabContainer Child` as tcc 
+		join `tabContainer` as tc on tcc.parent = tc.name
+		where tc.foreign_buyer=%s and tc.final_destination=%s and tcc.so_no=%s and tcc.item=%s""",
+						(foreign_buyer,final_destination,so_no,item), as_dict=1)
+		print("sum of qty",sum_of_quantity)
+		return sum_of_quantity[-len(sum_of_quantity)]['so_qty']

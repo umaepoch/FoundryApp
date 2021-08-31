@@ -80,7 +80,7 @@ def generate_qty_plan(data, filters):
 			if len(query) > 0:
 				for q in query:
 					d['Quantity Planned in Containers'] = q['qty_to_be_filled']
-					d['Quantity not Planned in Containers'] = q['qty_left_in_so']
+					d['Quantity not Planned in Containers'] = q['qty_left_in_so'] - q['qty_to_be_filled']
 
 			if len(query) == 0:
 				no_container = frappe.db.sql(""" select tsi.qty as qty_left_in_so
@@ -107,7 +107,7 @@ def generate_qty_plan(data, filters):
 			if len(query) > 0:
 				for q in query:
 					d['Quantity Planned in Containers'] = q['qty_to_be_filled']
-					d['Quantity not Planned in Containers'] = q['qty_left_in_so']
+					d['Quantity not Planned in Containers'] = q['qty_left_in_so'] - q['qty_to_be_filled']
 
 			if len(query) == 0:
 				no_container = frappe.db.sql(""" select tsi.qty as qty_left_in_so
