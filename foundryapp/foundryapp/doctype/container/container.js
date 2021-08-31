@@ -171,36 +171,39 @@ frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn) {
       console.log("qty", qty);
       container_child[i].total_quantity_of_item_in_container = qty;
       let weight_of_item = fetch_item_weight(item)
-      let qty = qty_to_be_filled * weight_of_item
-      sum_quantiy += qty
+      let total_qty = qty_to_be_filled * weight_of_item
+      sum_quantiy += total_qty
   } //end of for loop
   sum_quantiy = sum_quantiy / 1000
   container.total_planned_net_weight_of_container = sum_quantiy
-
-
-cur_frm.clear_table("dispatch_items");
-    container_child.forEach((child) => {
-      console.log("entering child loop")
-      let so_no = child.so_no
-      let item_code = child.item
-      let parent = child.parent
-
-      let dispatch = fetch_dispatch(so_no, item_code, parent)
-      dispatch.forEach((details) => {
-          console.log("entering dispatch loo")
-          var child = cur_frm.add_child("dispatch_items");
-          frappe.model.set_value(child.doctype, child.name, "invoice_item", details['item']);
-          frappe.model.set_value(child.doctype, child.name, "pallet_size", details['pallet_size']);
-          frappe.model.set_value(child.doctype, child.name, "quantity_planned_in_container", details['quantity_planned_in_container']);
-          frappe.model.set_value(child.doctype, child.name, "dispatch_item", details['dispatch_items']);
-          frappe.model.set_value(child.doctype, child.name, "quantity", details['quantity']);
-
-          // cur_frm.refresh_field("dispatch_items");
-      });//end of dispatch
-  })//end of conatiner child
+    
 });
 
+frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn) {
+    var cont = locals[cdt][cdn]
+    var container_child = cont.container_details;
+    // console.log(container_child)
+    cur_frm.clear_table("dispatch_items");
+    container_child.forEach((child) => {
+        console.log("entering child loop")
+        let so_no = child.so_no
+        let item_code = child.item
+        let parent = child.parent
 
+        let dispatch = fetch_dispatch(so_no, item_code, parent)
+        dispatch.forEach((details) => {
+            console.log("entering dispatch loo")
+            var child = cur_frm.add_child("dispatch_items");
+            frappe.model.set_value(child.doctype, child.name, "invoice_item", details['item']);
+            frappe.model.set_value(child.doctype, child.name, "pallet_size", details['pallet_size']);
+            frappe.model.set_value(child.doctype, child.name, "quantity_planned_in_container", details['quantity_planned_in_container']);
+            frappe.model.set_value(child.doctype, child.name, "dispatch_item", details['dispatch_items']);
+            frappe.model.set_value(child.doctype, child.name, "quantity", details['quantity']);
+
+            // cur_frm.refresh_field("dispatch_items");
+        });
+    })
+})
 //OPEN PO and CLOSED PO VALIDATION
 frappe.ui.form.on("Container", "validate", function(frm, cdt, cdn) {
   var checked_so = {};
@@ -239,7 +242,7 @@ frappe.ui.form.on("Container", "validate", function(frm, cdt, cdn) {
       }
   }
   if (is_po_matching) {
-      frappe.msgprint("You can save your container");
+      //frappe.msgprint("You can save your container");
       frappe.validated = true;
   } else {
       frappe.msgprint("You cannot save container.Please check Po Type of sales order");
