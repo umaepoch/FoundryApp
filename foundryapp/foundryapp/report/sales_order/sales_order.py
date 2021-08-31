@@ -74,13 +74,15 @@ def generate_qty_plan(data, filters):
 									join `tabBOM` as tb on tcc.item =tb.item
 									join `tabBOM Item` as tbi on tb.name = tbi.parent
 									where (tc.foreign_buyer=%s and tc.final_destination=%s) and (tbi.item_code=%s and tcc.so_no=%s)
-									and (tb.is_default=1 and (tc.document_status='Being Worked Upon' or tc.document_status='Finalized'))""",
+									and (tb.is_default=1 and (tc.document_status='Being Worked Upon' or tc.document_status='Finalized')) order by tcc.parent""",
 									(d['foreign_buyer_name'], d['final_destination'], d['item_code'], d['name']), as_dict=1)
 			# print(query)
 			if len(query) > 0:
+				to_be_filled = 0
 				for q in query:
-					d['Quantity Planned in Containers'] = q['qty_to_be_filled']
+					to_be_filled += q['qty_to_be_filled']
 					d['Quantity not Planned in Containers'] = q['qty_left_in_so'] - q['qty_to_be_filled']
+				d['Quantity Planned in Containers'] = to_be_filled
 
 			if len(query) == 0:
 				no_container = frappe.db.sql(""" select tsi.qty as qty_left_in_so
@@ -101,13 +103,15 @@ def generate_qty_plan(data, filters):
 									from `tabContainer Child` as tcc
 									join `tabContainer` as tc on tcc.parent = tc.name
 									where (tc.foreign_buyer=%s and tc.final_destination=%s) and (tcc.item=%s and tcc.so_no=%s)
-									and (tc.document_status='Being Worked Upon' or tc.document_status='Finalized')""",
+									and (tc.document_status='Being Worked Upon' or tc.document_status='Finalized') order by tcc.parent""",
 									(d['foreign_buyer_name'], d['final_destination'], d['item_code'], d['name']), as_dict=1)
 			# print(query)
 			if len(query) > 0:
+				to_be_filled = 0
 				for q in query:
-					d['Quantity Planned in Containers'] = q['qty_to_be_filled']
+					to_be_filled += q['qty_to_be_filled']
 					d['Quantity not Planned in Containers'] = q['qty_left_in_so'] - q['qty_to_be_filled']
+				d['Quantity Planned in Containers'] = to_be_filled
 
 			if len(query) == 0:
 				no_container = frappe.db.sql(""" select tsi.qty as qty_left_in_so

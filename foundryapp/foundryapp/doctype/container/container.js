@@ -293,7 +293,9 @@ frappe.ui.form.on("Container","after_save", function(frm ,cdt , cdn)
            console.log("quantity",quantity);
          
 		  container_child[i]['so_quantity_not_placed_in_containers_before_this_container']=quantity;
-		  container_child[i]['so_quantity_not_placed_in_containers_after_this_container']=container_child[i]['qty_left_in_so'];
+		  var qty_not_placed_in_container=(quantity)-(container_child[i]['qty_to_be_filled']);
+		  console.log("qty_not_placed_in_container",qty_not_placed_in_container)
+		  container_child[i]['so_quantity_not_placed_in_containers_after_this_container']=qty_not_placed_in_container;
 	}//end of for loop
 });
 
