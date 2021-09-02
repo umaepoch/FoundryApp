@@ -114,17 +114,16 @@ frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn) {
   var so_no = "";
   var sum_quantiy = 0
   for (var i = 0; i < container_child.length; i++) {
-      let qty_to_be_filled = container_child[i].qty_to_be_filled
-      let qty_left_in_so = container_child[i].qty_left_in_so
-      let so_qty_left = 0
-      item = container_child[i].item;
-      so_no = container_child[i].so_no;
-      var quantity = qty_in_container(foreign_buyer, final_destination, so_no, item);
-      console.log("quantity", quantity);
-      container_child[i]['so_quantity_not_placed_in_containers_before_this_container'] = quantity;
-      var qty_not_placed_in_container = (quantity) - (container_child[i]['qty_to_be_filled']);
-      console.log("qty_not_placed_in_container", qty_not_placed_in_container)
-      container_child[i]['so_quantity_not_placed_in_containers_after_this_container'] = qty_not_placed_in_container;
+    var qty_to_be_filled = container_child[i].qty_to_be_filled
+    var qty_left_in_so = container_child[i].qty_left_in_so
+    item = container_child[i].item;
+    so_no = container_child[i].so_no;
+    console.log("qty_to_be_filled",qty_to_be_filled)
+    console.log("qty_left_in_so",qty_left_in_so)
+    container_child[i]['so_quantity_not_placed_in_containers_before_this_container'] = qty_left_in_so;
+    var qty_not_placed_in_container = qty_left_in_so-qty_to_be_filled;
+    console.log("qty_not_placed_in_container", qty_not_placed_in_container)
+    container_child[i]['so_quantity_not_placed_in_containers_after_this_container'] = qty_not_placed_in_container;
       var qty = sum_of_qty(parent, item);
       console.log("qty", qty);
       container_child[i].total_quantity_of_item_in_container = qty;
