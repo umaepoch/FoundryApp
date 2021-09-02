@@ -136,7 +136,32 @@ frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn) {
     
 });
 
+//dispatch item
+frappe.ui.form.on("Container", "fetch_dispatch_items", function(frm, cdt, cdn) {
+    var cont = locals[cdt][cdn]
+    var container_child = cont.container_details;
+    // console.log(container_child)
+    cur_frm.clear_table("dispatch_items");
+    container_child.forEach((child) => {
+        console.log("entering child loop")
+        let so_no = child.so_no
+        let item_code = child.item
+        let parent = child.parent
 
+        let dispatch = fetch_dispatch(so_no, item_code, parent)
+        dispatch.forEach((details) => {
+            console.log("entering dispatch loo")
+            var child = cur_frm.add_child("dispatch_items");
+            frappe.model.set_value(child.doctype, child.name, "invoice_item", details['item']);
+            frappe.model.set_value(child.doctype, child.name, "pallet_size", details['pallet_size']);
+            frappe.model.set_value(child.doctype, child.name, "quantity_planned_in_container", details['quantity_planned_in_container']);
+            frappe.model.set_value(child.doctype, child.name, "dispatch_item", details['dispatch_items']);
+            frappe.model.set_value(child.doctype, child.name, "quantity", details['quantity']);
+
+            // cur_frm.refresh_field("dispatch_items");
+        });
+    })
+})
 //OPEN PO and CLOSED PO VALIDATION
 frappe.ui.form.on("Container", "validate", function(frm, cdt, cdn) {
   var checked_so = {};
