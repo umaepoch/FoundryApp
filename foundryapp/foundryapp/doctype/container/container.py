@@ -12,58 +12,49 @@ class Container(Document):
 	pass
 
 @frappe.whitelist()
-def fetch_so_details(document, foreign_buyer, final_destination):
-	try:
-		# date_format = "%d-%m-%Y"
-		so_details = frappe.db.sql("""select tso.name, tso.po_no, tso.foreign_buyer_name, tso.final_destination,
-									tsi.item_code, tsi.pch_pallet_size, tsi.qty, tsi.quantity_left_in_so,
-									tso.transaction_date,
-									tsi.delivery_date
-									from `tabSales Order Item` as tsi
-									join `tabSales Order` as tso on tso.name = tsi.parent
-									join `tabItem` as ti on ti.item_code = tsi.item_code
+def fetch_so_details(foreign_buyer, final_destination):
+	r_data = []
+	so_details = frappe.db.sql("""select tso.name, tso.po_no, 
+							tso.foreign_buyer_name, tso.final_destination,
+								tsi.item_code, tsi.pch_pallet_size,
+								tso.transaction_date,
+									tsi.delivery_date,
+					 tsi.qty from `tabSales Order Item` as tsi 
+					 join `tabSales Order` as tso on tso.name = tsi.parent 
+				join `tabItem` as ti on ti.item_code = tsi.item_code
 									where ti.pch_made=1 and tso.foreign_buyer_name=%s
 									and tso.final_destination=%s
 									order by tso.po_no,tsi.item_code""",
 									(foreign_buyer, final_destination),
 									as_dict = 1)
-
-
-		if document == 'Sales Order':
-			print(" ")
-			print("entered condition for sales order report.............")
-			print(so_details)
-			container = {
-			'foreign_buyer': foreign_buyer,
-			'final_destination': final_destination,
-			'container_details': []
-			}
-
-			for sd in so_details:
-				child = {
-					'so_no': sd.name,
-					'item': sd.item_code,
-					'pallet_size': sd.pch_pallet_size,
-					'so_qty': sd.qty,
-					'final_destination': sd.final_destination,
-					'customer_po_number': sd.po_no,
-					'so_date': sd.delivery_date,
-					'initial_delivery_date': sd.transaction_date
-				}
-				print("child : ", child)
-				container['container_details'].append(child)
-
-			# doc = frappe.new_doc('Container')
-			# doc.update(outerjson)
-			print("Container : ", container)
-			print(" ")
-			return container
-
-		if document == 'Container':
-			return so_details
-	except Exception as ex:
-		print(ex)
-		return ex
+	print("details",so_details)
+	for d in so_details:
+		print("so_no",d.name)
+		so_no=d.name
+		item=d.item_code
+		data=frappe.db.sql("""select so_no,so_qty,item,sum(qty_to_be_filled),so_qty-sum(qty_to_be_filled) as qty_in_so
+		from `tabContainer Child` where so_no='"""+so_no+"""' and item='"""+item+"""'
+		""", as_dict=1)
+		print("data",data[0].so_qty)
+		qty_in_so=0;
+		if data[0].qty_in_so is None or data[0].qty_in_so is "" :
+			print("enterd in if")
+			qty_in_so=data[0].so_qty;
+			r_data.append({'name':d.name,'po_no':d['po_no'],'foreign_buyer_name':d['foreign_buyer_name'],
+							'final_destination':d['final_destination'],'item_code':d['item_code'],
+							'pch_pallet_size':d['pch_pallet_size'],'transaction_date':d['transaction_date'],
+							'delivery_date':d['delivery_date'],'qty':d['qty'],
+							'qty_left_in_so':d['qty']})
+		else:
+			print("entered in else")
+			qty_in_so=data[0].qty_in_so;	
+			r_data.append({'name':d.name,'po_no':d['po_no'],'foreign_buyer_name':d['foreign_buyer_name'],
+							'final_destination':d['final_destination'],'item_code':d['item_code'],
+							'pch_pallet_size':d['pch_pallet_size'],'transaction_date':d['transaction_date'],
+							'delivery_date':d['delivery_date'],'qty':d['qty'],
+							'qty_left_in_so':qty_in_so})
+	print("r_data",r_data)
+	return r_data
 
 @frappe.whitelist()
 def validate_container_exist(foreign_buyer, final_destination):

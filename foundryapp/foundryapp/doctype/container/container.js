@@ -5,40 +5,29 @@ frappe.ui.form.on("Container", "fetch_sales_order_data", function(frm, cdt, cdn)
   var foreign_buyer = d.foreign_buyer;
   var final_destination = d.final_destination;
   var warehouse = d.warehouse;
-
+  var scheduled_date=d.scheduled_date;
   if (foreign_buyer && final_destination) {
-      // var msg = check_for_existing(foreign_buyer, final_destination)
-      // if (msg.length > 0) {
-      //   var existing = ""
-      //   msg.forEach((cont)=> {
-      //     existing += cont["name"]+" "
-      //   })
-      //   // frappe.msgprint(`The Following Container Plans ${existing}exist for this combination that has not been Finalized yet. Do you want to work with that Document`)
-      //   frappe.confirm(`The Following Container Plans ${existing} exist for this combination that has not been Finalized yet. Do you want to work with that Document?`,
-      //     () => {
-      //       // action to perform if Yes is selected
-      //     }, () => {
-      //       // action to perform if No is selected
-      //     })
-      // }
-      // if (msg.length == 0) {
-      var details = fetch_so_details(foreign_buyer, final_destination, cdt)
+      
+      var details = fetch_so_details(foreign_buyer, final_destination)
       for (var j = 0; j < details.length; j++) {
           var child = cur_frm.add_child("container_details");
           // console.log("entered in row");
           // console.log(details[j])
           frappe.model.set_value(child.doctype, child.name, "so_no", details[j]['name']);
-          frappe.model.set_value(child.doctype, child.name, "item", details[j]['item_code']);
-          frappe.model.set_value(child.doctype, child.name, "pallet_size", details[j]['pch_pallet_size']);
-          frappe.model.set_value(child.doctype, child.name, "so_qty", details[j]['qty']);
-          frappe.model.set_value(child.doctype, child.name, "qty_left_in_so", details[j]['quantity_left_in_so']);
-          if (warehouse) {
-              frappe.model.set_value(child.doctype, child.name, "container_warehouse", warehouse);
-          }
-          frappe.model.set_value(child.doctype, child.name, "final_destination", final_destination);
-          frappe.model.set_value(child.doctype, child.name, "customer_po_number", details[j]['po_no']);
-          frappe.model.set_value(child.doctype, child.name, "so_date", details[j]['delivery_date']);
-          frappe.model.set_value(child.doctype, child.name, "initial_delivery_date", details[j]['transaction_date']);
+        frappe.model.set_value(child.doctype, child.name, "item", details[j]['item_code']);
+        frappe.model.set_value(child.doctype, child.name, "pallet_size", details[j]['pch_pallet_size']);
+        frappe.model.set_value(child.doctype, child.name, "so_qty", details[j]['qty']);
+        frappe.model.set_value(child.doctype, child.name, "qty_left_in_so", details[j]['qty_left_in_so']);
+        if (warehouse) {
+            frappe.model.set_value(child.doctype, child.name, "container_warehouse", warehouse);
+        }
+        if (scheduled_date) {
+          frappe.model.set_value(child.doctype, child.name, "scheduled_date", scheduled_date);
+      }
+        frappe.model.set_value(child.doctype, child.name, "final_destination", final_destination);
+        frappe.model.set_value(child.doctype, child.name, "customer_po_number", details[j]['po_no']);
+        frappe.model.set_value(child.doctype, child.name, "so_date",details[j]['delivery_date']);
+       frappe.model.set_value(child.doctype, child.name, "initial_delivery_date", details[j]['transaction_date']);
           cur_frm.refresh_field("container_details");
       }
       // }
@@ -47,27 +36,27 @@ frappe.ui.form.on("Container", "fetch_sales_order_data", function(frm, cdt, cdn)
   }
 });
 
-function fetch_so_details(foreign_buyer, final_destination, cdt) {
+function fetch_so_details(foreign_buyer, final_destination) {
+  
+    console.log("entered into function");
+    var selected_so = "";
+    frappe.call({
+        method: 'foundryapp.foundryapp.doctype.container.container.fetch_so_details',
+        args: {
+            "foreign_buyer": foreign_buyer,
+            "final_destination": final_destination
+        },
+        async: false,
+        callback: function(r) {
+            if (r.message) {
+                // console.log(r.message)
+                selected_so = r.message;
+            }
+        }
+    });
+    return selected_so;
+  }
 
-  console.log("entered into function");
-  var selected_so = "";
-  frappe.call({
-      method: 'foundryapp.foundryapp.doctype.container.container.fetch_so_details',
-      args: {
-          "document": cdt,
-          "foreign_buyer": foreign_buyer,
-          "final_destination": final_destination
-      },
-      async: false,
-      callback: function(r) {
-          if (r.message) {
-              // console.log(r.message)
-              selected_so = r.message;
-          }
-      }
-  });
-  return selected_so;
-}
 
 frappe.ui.form.on("Container Child", "qty_to_be_filled", function(frm, cdt, cdn) {
   var child = locals[cdt][cdn]
@@ -77,43 +66,12 @@ frappe.ui.form.on("Container Child", "qty_to_be_filled", function(frm, cdt, cdn)
   if (qty_to_be_filled > qty_left_in_so) {
       frappe.msgprint(`Quantity to be filled is greater than quantity left in sales order: ${qty_left_in_so}`)
   }
-  if (qty_left_in_so !== 0 && qty_left_in_so >= qty_to_be_filled) {
-      let so_no = child.so_no
-      let item = child.item
-      let so_qty_left = child.qty_left_in_so - child.qty_to_be_filled
-      update_so_qty_left(so_no, item, so_qty_left)
-  }
+  
 
 })
 
 
 
-frappe.ui.form.on("Container Child", "validate", function(frm, cdt, cdn) {
-  var child = locals[cdt][cdn]
-  console.log(child)
-})
-
-
-
-function update_so_qty_left(so_no, item, so_qty_left) {
-  let flag;
-  frappe.call({
-      method: 'foundryapp.foundryapp.doctype.container.container.update_so_for_qty',
-      args: {
-          "so_no": so_no,
-          "item": item,
-          "so_qty_left": so_qty_left
-      },
-      async: false,
-      callback: function(r) {
-          if (r.message) {
-              console.log(r.message)
-              flag = r.message
-          }
-      }
-  })
-  return flag
-}
 
 function check_for_existing(foreign_buyer, final_destination) {
   var print;
@@ -179,31 +137,7 @@ frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn) {
     
 });
 
-frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn) {
-    var cont = locals[cdt][cdn]
-    var container_child = cont.container_details;
-    // console.log(container_child)
-    cur_frm.clear_table("dispatch_items");
-    container_child.forEach((child) => {
-        console.log("entering child loop")
-        let so_no = child.so_no
-        let item_code = child.item
-        let parent = child.parent
 
-        let dispatch = fetch_dispatch(so_no, item_code, parent)
-        dispatch.forEach((details) => {
-            console.log("entering dispatch loo")
-            var child = cur_frm.add_child("dispatch_items");
-            frappe.model.set_value(child.doctype, child.name, "invoice_item", details['item']);
-            frappe.model.set_value(child.doctype, child.name, "pallet_size", details['pallet_size']);
-            frappe.model.set_value(child.doctype, child.name, "quantity_planned_in_container", details['quantity_planned_in_container']);
-            frappe.model.set_value(child.doctype, child.name, "dispatch_item", details['dispatch_items']);
-            frappe.model.set_value(child.doctype, child.name, "quantity", details['quantity']);
-
-            // cur_frm.refresh_field("dispatch_items");
-        });
-    })
-})
 //OPEN PO and CLOSED PO VALIDATION
 frappe.ui.form.on("Container", "validate", function(frm, cdt, cdn) {
   var checked_so = {};
