@@ -14,19 +14,19 @@ class Container(Document):
 @frappe.whitelist()
 def fetch_so_details(foreign_buyer, final_destination):
 	r_data = []
-	so_details = frappe.db.sql("""select tso.name, tso.po_no, 
-							tso.foreign_buyer_name, tso.final_destination,
+	so_details = frappe.db.sql("""select tso.name, tso.po_no,
+								tso.foreign_buyer_name, tso.final_destination,
 								tsi.item_code, tsi.pch_pallet_size,
 								tso.transaction_date,
-									tsi.delivery_date,
-					 tsi.qty from `tabSales Order Item` as tsi 
-					 join `tabSales Order` as tso on tso.name = tsi.parent 
-				join `tabItem` as ti on ti.item_code = tsi.item_code
-									where ti.pch_made=1 and tso.foreign_buyer_name=%s
-									and tso.final_destination=%s
-									order by tso.po_no,tsi.item_code""",
-									(foreign_buyer, final_destination),
-									as_dict = 1)
+								tsi.delivery_date,
+					 			tsi.qty from `tabSales Order Item` as tsi
+					 			join `tabSales Order` as tso on tso.name = tsi.parent
+								join `tabItem` as ti on ti.item_code = tsi.item_code
+								where ti.pch_made=1 and tso.foreign_buyer_name=%s
+								and tso.final_destination=%s
+								order by tso.po_no,tsi.item_code""",
+								(foreign_buyer, final_destination),
+								as_dict = 1)
 	print("details",so_details)
 	for d in so_details:
 		print("so_no",d.name)
@@ -47,7 +47,7 @@ def fetch_so_details(foreign_buyer, final_destination):
 							'qty_left_in_so':d['qty']})
 		else:
 			print("entered in else")
-			qty_in_so=data[0].qty_in_so;	
+			qty_in_so=data[0].qty_in_so;
 			r_data.append({'name':d.name,'po_no':d['po_no'],'foreign_buyer_name':d['foreign_buyer_name'],
 							'final_destination':d['final_destination'],'item_code':d['item_code'],
 							'pch_pallet_size':d['pch_pallet_size'],'transaction_date':d['transaction_date'],
@@ -76,16 +76,16 @@ def get_container_dispatch_items(parent):
 	items_data=[]
 	items = frappe.db.sql("""select distinct item,
 	pallet_size,
-	total_quantity_of_item_in_container from `tabContainer Child` 
+	total_quantity_of_item_in_container from `tabContainer Child`
 	where parent=%s""",(parent),as_dict=1)
 	print("items",items)
 	for d in items:
 		print("item",d.item)
 		item=d.item
-		data=frappe.db.sql("""select tbi.item_code as dispatch_items 
+		data=frappe.db.sql("""select tbi.item_code as dispatch_items
 		from `tabBOM` as tb join `tabBOM Item` as tbi
 		on tb.name = tbi.parent join `tabItem` as ti
-		on ti.item_code = tbi.item_code where ti.pch_made=1 
+		on ti.item_code = tbi.item_code where tb.is_default=1 and tbi.docstatus=1 ti.pch_made=1
 		and tb.item_name='"""+item+"""' """, as_dict=1)
 		for item in data:
 			items_data.append({'item':d.item,
@@ -121,9 +121,9 @@ def qty_sum(parent,item):
 
 @frappe.whitelist()
 def container_details(foreign_buyer,final_destination,so_no,item):
-	sum_of_quantity = frappe.db.sql("""select 
+	sum_of_quantity = frappe.db.sql("""select
 	 tcc.so_qty as so_qty
-	 from `tabContainer Child` as tcc 
+	 from `tabContainer Child` as tcc
 	join `tabContainer` as tc on tcc.parent = tc.name
 	where tc.foreign_buyer=%s and tc.final_destination=%s and tcc.so_no=%s and tcc.item=%s""",
 							(foreign_buyer,final_destination,so_no,item), as_dict=1)
@@ -132,9 +132,9 @@ def container_details(foreign_buyer,final_destination,so_no,item):
 		return sum_of_quantity[0]['so_qty']
 	else:
 		print("entered in else")
-		sum_of_quantity = frappe.db.sql("""select 
+		sum_of_quantity = frappe.db.sql("""select
 		tcc.qty_left_in_so as so_qty
-		from `tabContainer Child` as tcc 
+		from `tabContainer Child` as tcc
 		join `tabContainer` as tc on tcc.parent = tc.name
 		where tc.foreign_buyer=%s and tc.final_destination=%s and tcc.so_no=%s and tcc.item=%s""",
 						(foreign_buyer,final_destination,so_no,item), as_dict=1)

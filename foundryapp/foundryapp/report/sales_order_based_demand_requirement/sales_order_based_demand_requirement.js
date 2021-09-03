@@ -24,7 +24,7 @@ frappe.query_reports["Sales Order Based Demand Requirement"] = {
 	],
 	onload: function(report) {
 		report.page.add_inner_button(__("Sales Order Report"), function() {
-			frappe.set_route('query-report', 'Sales Order')
+			frappe.set_route('query-report', 'Sales Order Container Planning Report')
 		});
 	}
 };

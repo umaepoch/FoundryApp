@@ -36,7 +36,7 @@ def get_report(sdi, week):
 							join `tabBOM` as tb on tsi.item_code = tb.item
 							join `tabBOM Item` as tbi on tb.name = tbi.parent
 							join `tabItem` as ti on ti.item_code = tbi.item_code
-							where ti.pch_made=1 and tb.is_default=1
+							where ti.pch_made=1 and tb.is_default=1 and tbi.docstatus=1
 							group by tbi.item_code, delivery_date
 							order by delivery_date, tbi.item_code""",(week), as_dict=1)
 
@@ -64,7 +64,7 @@ def get_total_weight_for_week(sdi, week):
 								join `tabBOM` as tb on tb.item = tsi.item_code
 								join `tabBOM Item` as tbi on tb.name = tbi.parent
 								join `tabItem` as ti on ti.item_code = tbi.item_code
-								where ti.pch_made=1
+								where ti.pch_made=1 and tb.is_default=1 and tbi.docstatus=1
 								group by delivery_date, tbi.item_code) as twfw
 								group by twfw.delivery_date""",(week), as_dict=1)
 
