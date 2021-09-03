@@ -67,7 +67,8 @@ def fetch_invoice_items_report(week):
 def generate_qty_plan(data, filters):
 	if filters.get("show_dispatch_items") == 1:
 		for d in data:
-			query = frappe.db.sql("""select tcc.parent, tbi.item_code,tcc.so_qty, truncate(tcc.qty_left_in_so*tbi.qty/tb.quantity,0) as qty_left_in_so,
+			query = frappe.db.sql("""select tcc.parent, tbi.item_code,truncate(tcc.so_qty*tbi.qty/tb.quantity,0) as so_qty,
+									truncate(tcc.qty_left_in_so*tbi.qty/tb.quantity,0) as qty_left_in_so,
 									sum(truncate(tcc.qty_to_be_filled*tbi.qty/tb.quantity, 0)) as qty_to_be_filled
 									from `tabContainer Child` as tcc
 									join `tabContainer` as tc on tcc.parent = tc.name
@@ -84,7 +85,7 @@ def generate_qty_plan(data, filters):
 				for q in query:
 					if q.parent:
 						to_be_filled = q['qty_to_be_filled']
-						left_in_so = q['qty_left_in_so'] - q['qty_to_be_filled']
+						left_in_so = q['so_qty'] - q['qty_to_be_filled']
 						d['Quantity not Planned in Containers'] = left_in_so
 						d['Quantity Planned in Containers'] = to_be_filled
 					if q.parent is None:
