@@ -72,22 +72,28 @@ def validate_container_exist(foreign_buyer, final_destination):
 		return ex
 
 @frappe.whitelist()
-def get_container_dispatch_items(so_no, item_code, parent):
-	try:
-		dispatch = frappe.db.sql(""" select tcc.item, tcc.pallet_size,
-								tcc.total_quantity_of_item_in_container as quantity_planned_in_container,
-								tbi.item_code as dispatch_items,
-								tcc.total_quantity_of_item_in_container as quantity
-								from `tabContainer Child` as tcc
-								join `tabContainer` as tc on tcc.parent = tc.name
-								join `tabBOM` as tb on tcc.item =tb.item
-								join `tabBOM Item` as tbi on tb.name = tbi.parent
-								join `tabItem` as ti on ti.item_code = tbi.item_code
-								where (ti.pch_made=1 and tcc.item=%s) and (tcc.so_no=%s and tcc.parent=%s)""",
-								(item_code, so_no, parent), as_dict=1)
-		return dispatch
-	except Exception as e:
-		raise
+def get_container_dispatch_items(parent):
+	items_data=[]
+	items = frappe.db.sql("""select distinct item,
+	pallet_size,
+	total_quantity_of_item_in_container from `tabContainer Child` 
+	where parent=%s""",(parent),as_dict=1)
+	print("items",items)
+	for d in items:
+		print("item",d.item)
+		item=d.item
+		data=frappe.db.sql("""select tbi.item_code as dispatch_items 
+		from `tabBOM` as tb join `tabBOM Item` as tbi
+		on tb.name = tbi.parent join `tabItem` as ti
+		on ti.item_code = tbi.item_code where ti.pch_made=1 
+		and tb.item_name='"""+item+"""' """, as_dict=1)
+		for item in data:
+			items_data.append({'item':d.item,
+							'pch_pallet_size':d.pallet_size,
+							'total_quantity_of_item_in_container':d.total_quantity_of_item_in_container,
+							'dispatch_items':item.dispatch_items})
+	print("items_data",items_data)
+	return items_data
 
 
 @frappe.whitelist()

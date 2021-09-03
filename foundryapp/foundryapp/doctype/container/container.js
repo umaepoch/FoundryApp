@@ -142,26 +142,24 @@ frappe.ui.form.on("Container", "fetch_dispatch_items", function(frm, cdt, cdn) {
     var container_child = cont.container_details;
     // console.log(container_child)
     cur_frm.clear_table("dispatch_items");
-    container_child.forEach((child) => {
-        console.log("entering child loop")
-        let so_no = child.so_no
-        let item_code = child.item
-        let parent = child.parent
+    var parent=cont.name;
+        let dispatch = fetch_dispatch(parent)
+       console.log("dispatch",dispatch)
+       dispatch.forEach((details) => {
+        console.log("entering dispatch loo")
+        var child = cur_frm.add_child("dispatch_items");
+        frappe.model.set_value(child.doctype, child.name, "invoice_item", details['item']);
+        frappe.model.set_value(child.doctype, child.name, "pallet_size", details['pch_pallet_size']);
+        frappe.model.set_value(child.doctype, child.name, "quantity_planned_in_container", details['total_quantity_of_item_in_container']);
+        frappe.model.set_value(child.doctype, child.name, "dispatch_item", details['dispatch_items']);
+        frappe.model.set_value(child.doctype, child.name, "quantity", details['total_quantity_of_item_in_container']);
 
-        let dispatch = fetch_dispatch(so_no, item_code, parent)
-        dispatch.forEach((details) => {
-            console.log("entering dispatch loo")
-            var child = cur_frm.add_child("dispatch_items");
-            frappe.model.set_value(child.doctype, child.name, "invoice_item", details['item']);
-            frappe.model.set_value(child.doctype, child.name, "pallet_size", details['pallet_size']);
-            frappe.model.set_value(child.doctype, child.name, "quantity_planned_in_container", details['quantity_planned_in_container']);
-            frappe.model.set_value(child.doctype, child.name, "dispatch_item", details['dispatch_items']);
-            frappe.model.set_value(child.doctype, child.name, "quantity", details['quantity']);
-
-            // cur_frm.refresh_field("dispatch_items");
-        });
-    })
+        // cur_frm.refresh_field("dispatch_items");
+    });
+    
+    //frm.save();
 })
+
 //OPEN PO and CLOSED PO VALIDATION
 frappe.ui.form.on("Container", "validate", function(frm, cdt, cdn) {
   var checked_so = {};
@@ -254,25 +252,24 @@ function fetch_item_weight(item_code) {
   });
   return weight;
 }
-function fetch_dispatch(so_no, item_code, parent) {
-  let items;
-  frappe.call({
-      method: 'foundryapp.foundryapp.doctype.container.container.get_container_dispatch_items',
-      args: {
-          "so_no": so_no,
-          "item_code": item_code,
-          "parent": parent
-      },
-      async: false,
-      callback: function(r) {
-          if (r.message) {
-              // console.log(r.message)
-              items = r.message
-          }
-      }
-  })
-  return items
-}
+
+function fetch_dispatch(parent) {
+    let items;
+    frappe.call({
+        method: 'foundryapp.foundryapp.doctype.container.container.get_container_dispatch_items',
+        args: {
+            "parent": parent
+        },
+        async: false,
+        callback: function(r) {
+            if (r.message) {
+                // console.log(r.message)
+                items = r.message
+            }
+        }
+    })
+    return items
+  }
 
 
 
