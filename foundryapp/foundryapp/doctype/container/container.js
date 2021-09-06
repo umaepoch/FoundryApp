@@ -314,3 +314,54 @@ function qty_in_container(foreign_buyer, final_destination, so_no, item) {
   })
   return qty
 }
+
+//Warehouse validation
+frappe.ui.form.on("Container", "warehouse", function(frm, cdt, cdn) {
+    var d = locals[cdt][cdn];
+    var warehouse = frm.doc.warehouse;
+    console.log("warehouse",warehouse);
+    var container_warehouse=fetch_warehouse_container(warehouse)
+  console.log("container_warehouse",container_warehouse)
+  if(container_warehouse!=0)
+{
+    frappe.msgprint("Warehouse already existed for another container")
+			frappe.validated = false;
+}
+
+});
+frappe.ui.form.on("Container", "validate", function(frm, cdt, cdn) {
+    var d = locals[cdt][cdn];
+    var warehouse = frm.doc.warehouse;
+    console.log("warehouse",warehouse);
+    var container_warehouse=fetch_warehouse_container(warehouse)
+  console.log("container_warehouse",container_warehouse)
+  if(container_warehouse!=0)
+{
+    frappe.msgprint("Warehouse already existed for another container")
+			frappe.validated = false;
+}
+
+});
+
+function fetch_warehouse_container(warehouse) {
+    var warehouse;
+  
+    frappe.call({
+        method: 'frappe.client.get_list',
+        args: {
+            'doctype': 'Container',
+            'fieldname': 'name',
+  
+            'filters': {
+                'warehouse': warehouse,
+            }
+        },
+        async: false,
+        callback: function(r) {
+            if (r.message) {
+                warehouse = r.message.length;
+            }
+        }
+    });
+    return warehouse;
+  }

@@ -85,7 +85,7 @@ def get_container_dispatch_items(parent):
 		data=frappe.db.sql("""select tbi.item_code as dispatch_items
 		from `tabBOM` as tb join `tabBOM Item` as tbi
 		on tb.name = tbi.parent join `tabItem` as ti
-		on ti.item_code = tbi.item_code where tb.is_default=1 and tbi.docstatus=1 ti.pch_made=1
+		on ti.item_code = tbi.item_code where tb.is_default=1 and tbi.docstatus=1 and ti.pch_made=1
 		and tb.item_name='"""+item+"""' """, as_dict=1)
 		for item in data:
 			items_data.append({'item':d.item,

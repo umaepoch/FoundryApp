@@ -40,7 +40,8 @@
       "fieldname": "warehouse",
       "fieldtype": "Link",
       "label": "Warehouse",
-      "options": "Warehouse"
+      "options": "Warehouse",
+      "reqd": 1
      },
      {
       "fieldname": "document_status",
@@ -51,7 +52,8 @@
      {
       "fieldname": "scheduled_date",
       "fieldtype": "Date",
-      "label": "Scheduled Date"
+      "label": "Scheduled Date",
+      "reqd": 1
      },
      {
       "fieldname": "container_details",
