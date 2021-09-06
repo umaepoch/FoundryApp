@@ -329,19 +329,7 @@ frappe.ui.form.on("Container", "warehouse", function(frm, cdt, cdn) {
 }
 
 });
-frappe.ui.form.on("Container", "validate", function(frm, cdt, cdn) {
-    var d = locals[cdt][cdn];
-    var warehouse = frm.doc.warehouse;
-    console.log("warehouse",warehouse);
-    var container_warehouse=fetch_warehouse_container(warehouse)
-  console.log("container_warehouse",container_warehouse)
-  if(container_warehouse!=0)
-{
-    frappe.msgprint("Warehouse already existed for another container")
-			frappe.validated = false;
-}
 
-});
 
 function fetch_warehouse_container(warehouse) {
     var warehouse;
