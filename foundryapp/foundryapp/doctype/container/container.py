@@ -16,7 +16,7 @@ def fetch_so_details(foreign_buyer, final_destination):
 	r_data = []
 	so_details = frappe.db.sql("""select tso.name, tso.po_no,
 								tso.foreign_buyer_name, tso.final_destination,
-								tsi.item_code, tsi.pch_pallet_size,
+								tsi.item_code,tsi.item_name,tsi.pch_pallet_size,
 								tso.transaction_date,
 								tsi.delivery_date,
 					 			tsi.qty from `tabSales Order Item` as tsi
@@ -41,7 +41,7 @@ def fetch_so_details(foreign_buyer, final_destination):
 			print("enterd in if")
 			qty_in_so=data[0].so_qty;
 			r_data.append({'name':d.name,'po_no':d['po_no'],'foreign_buyer_name':d['foreign_buyer_name'],
-							'final_destination':d['final_destination'],'item_code':d['item_code'],
+							'final_destination':d['final_destination'],'item_code':d['item_code'],'item_name':d['item_name'],
 							'pch_pallet_size':d['pch_pallet_size'],'transaction_date':d['transaction_date'],
 							'delivery_date':d['delivery_date'],'qty':d['qty'],
 							'qty_left_in_so':d['qty']})
@@ -49,7 +49,7 @@ def fetch_so_details(foreign_buyer, final_destination):
 			print("entered in else")
 			qty_in_so=data[0].qty_in_so;
 			r_data.append({'name':d.name,'po_no':d['po_no'],'foreign_buyer_name':d['foreign_buyer_name'],
-							'final_destination':d['final_destination'],'item_code':d['item_code'],
+							'final_destination':d['final_destination'],'item_code':d['item_code'],'item_name':d['item_name'],
 							'pch_pallet_size':d['pch_pallet_size'],'transaction_date':d['transaction_date'],
 							'delivery_date':d['delivery_date'],'qty':d['qty'],
 							'qty_left_in_so':qty_in_so})
@@ -86,7 +86,7 @@ def get_container_dispatch_items(parent):
 		from `tabBOM` as tb join `tabBOM Item` as tbi
 		on tb.name = tbi.parent join `tabItem` as ti
 		on ti.item_code = tbi.item_code where tb.is_default=1 and tbi.docstatus=1 and ti.pch_made=1
-		and tb.item_name='"""+item+"""' """, as_dict=1)
+		and tb.item='"""+item+"""' """, as_dict=1)
 		for item in data:
 			items_data.append({'item':d.item,
 							'pch_pallet_size':d.pallet_size,

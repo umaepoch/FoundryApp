@@ -156,6 +156,7 @@ def create_invoice_stock_entry_material_trans(filters=None):
 		doc = frappe.new_doc("Stock Entry")
 		doc.update(outerJson)
 		doc.save()
+		doc.submit()
 		print(doc.name)
 		return doc.name
 

@@ -55,7 +55,7 @@ frappe.query_reports["Invoice Container"] = {
 function get_invoice_container_stock(filters) {
 	let form
 	frappe.call({
-		method: 'foundryapp.foundryapp.report.container_details_invoice_report.container_details_invoice_report.create_invoice_stock_entry_manufacture',
+		method: 'foundryapp.foundryapp.report.invoice_container.invoice_container.create_invoice_stock_entry_manufacture',
 		args: {
 			filters: filters
 		},

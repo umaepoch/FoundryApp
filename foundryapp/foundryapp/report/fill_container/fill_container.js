@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Container Details"] = {
+frappe.query_reports["Fill Container"] = {
 	"filters": [
 
 		{
@@ -48,7 +48,6 @@ frappe.query_reports["Container Details"] = {
 			} else {
 				frappe.throw(__("Please Select The Container"))
 			}
-
 		});
 	}
 };
@@ -56,7 +55,7 @@ frappe.query_reports["Container Details"] = {
 function get_invoice_container_stock_material_trans(filters) {
 	let form
 	frappe.call({
-		method: 'foundryapp.foundryapp.report.container_details.container_details.create_invoice_stock_entry_material_trans',
+		method: 'foundryapp.foundryapp.report.fill_container.fill_container.create_invoice_stock_entry_material_trans',
 		args: {
 			filters: filters
 		},

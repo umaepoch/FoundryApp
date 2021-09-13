@@ -88,6 +88,7 @@ def fetching_container_details(filters):
 				warehouse_qty=0
 
 		for item in data:
+			print(d)
 			items_data.append({'parent':d.parent,
 							'foreign_buyer':d.foreign_buyer,
 							'item':d.item,
@@ -170,7 +171,7 @@ def create_invoice_stock_entry_manufacture(filters):
 						doc_dispatch = frappe.new_doc("Stock Entry")
 						doc_dispatch.update(outerJson_dispatch)
 						doc_dispatch.save()
-						#doc_dispatch.submit()
+						doc_dispatch.submit()
 
 						# innerJson_invoice = {
 						# 	"item_code": items['item'],
