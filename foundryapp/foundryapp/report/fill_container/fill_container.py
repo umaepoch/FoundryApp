@@ -45,7 +45,7 @@ def execute(filters=None):
 						cont_dict['qty_to_be_filled'],
 						cont_dict['container_warehouse'],
 						cont_dict['total_quantity_of_item_in_container'],
-						cont_dict['scheduled_date'].strftime("%d-%m-%Y"),
+						cont_dict['scheduled_date'].strftime("%d-%m-%Y") if cont_dict['scheduled_date'] else "",
 						cont_dict['dispatch_items'],
 						cont_dict['dispatch_item_qty'],
 						cont_dict['dispatch_item_uom'],

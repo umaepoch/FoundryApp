@@ -39,7 +39,7 @@ def execute(filters=None):
 						cont_dict['final_destination'],
 						cont_dict['container_warehouse'],
 						cont_dict['total_quantity_of_item_in_container'],
-						cont_dict['scheduled_date'].strftime("%d-%m-%Y"),
+						cont_dict['scheduled_date'].strftime("%d-%m-%Y") if cont_dict['scheduled_date'] else "",
 						cont_dict['dispatch_items'],
 						cont_dict['dispatch_item_qty'],
 						cont_dict['dispatch_item_uom'],
@@ -88,7 +88,6 @@ def fetching_container_details(filters):
 				warehouse_qty=0
 
 		for item in data:
-			print(d)
 			items_data.append({'parent':d.parent,
 							'foreign_buyer':d.foreign_buyer,
 							'item':d.item,
