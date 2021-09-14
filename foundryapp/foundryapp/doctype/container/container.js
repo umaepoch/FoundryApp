@@ -116,12 +116,20 @@ frappe.ui.form.on("Container", "fetch_sales_order_data", function(frm, cdt, cdn)
     var foreign_buyer = d.foreign_buyer;
     var final_destination = d.final_destination;
     var container_child = frm.doc.container_details;
+    var scheduled_date=d.scheduled_date;
+     var warehouse = d.warehouse;
     var item = "";
     var so_no = "";
     var sum_quantiy = 0
     for (var i = 0; i < container_child.length; i++) {
       var qty_to_be_filled = container_child[i].qty_to_be_filled
       var qty_left_in_so = container_child[i].qty_left_in_so
+      if (scheduled_date) {
+        container_child[i].scheduled_date = scheduled_date
+      }
+      if (warehouse) {
+        container_child[i].container_warehouse = warehouse
+      }
       item = container_child[i].item;
       so_no = container_child[i].so_no;
       console.log("qty_to_be_filled",qty_to_be_filled)

@@ -45,7 +45,7 @@ def execute(filters=None):
 						cont_dict['qty_to_be_filled'],
 						cont_dict['container_warehouse'],
 						cont_dict['total_quantity_of_item_in_container'],
-						cont_dict['scheduled_date'].strftime("%d-%m-%Y") if cont_dict['scheduled_date'] else "",
+						cont_dict['scheduled_date'].strftime("%d-%m-%Y"),
 						cont_dict['dispatch_items'],
 						cont_dict['dispatch_item_qty'],
 						cont_dict['dispatch_item_uom'],
@@ -59,7 +59,6 @@ def execute(filters=None):
 
 def fetching_container_details(filters):
 	condition = get_conditions(filters)
-
 	items_data=[]
 	items = frappe.db.sql(""" select  tc.foreign_buyer,tcc.so_qty as so_qty,tcc.parent,
 	tcc.so_date,tcc.initial_delivery_date, tcc.item,tcc.so_no,
@@ -67,35 +66,35 @@ def fetching_container_details(filters):
 	tcc.qty_left_in_so,tcc.final_destination,
 	tcc.qty_to_be_filled,tcc.container_warehouse,
 	tcc.total_quantity_of_item_in_container,
-	tcc.scheduled_date  from `tabContainer Child` as tcc
+	tcc.scheduled_date  from `tabContainer Child` as tcc 
 	join `tabContainer` as tc on tcc.parent = tc.name %s""" % condition, as_dict=1)
 	print("items",items)
-
+	
 	for d in items:
 		print("item",d.item)
 		item=d.item
+		total_qty_of_container=d.total_quantity_of_item_in_container
+		print("total_qty_of_container",total_qty_of_container)	
 		data=frappe.db.sql("""select tbi.item_code as dispatch_items,ti.stock_uom,
-							truncate(tcc.total_quantity_of_item_in_container*tbi.qty/tb.quantity, 0) as total_quantity
-							from `tabContainer Child` as tcc
-							join `tabContainer` as tc on tcc.parent = tc.name
-							join `tabBOM` as tb on tcc.item =tb.item
-							join `tabBOM Item` as tbi on tb.name = tbi.parent
-							join `tabItem` as ti on ti.item_code = tbi.item_code where tb.is_default=1 and tbi.docstatus=1 and ti.pch_made=1
-							and tb.item_name='"""+item+"""' """, as_dict=1)
+		tbi.qty,tb.quantity
+		from `tabBOM` as tb join `tabBOM Item` as tbi
+		on tb.name = tbi.parent join `tabItem` as ti
+		on ti.item_code = tbi.item_code where tb.is_default=1 and tbi.docstatus=1 and ti.pch_made=1
+		and tb.item='"""+item+"""' """, as_dict=1)
 		for dispatch_items in data:
 			source_warehouse=frappe.db.get_single_value("FoundryApp Settings", "production_entry_warehouse")
 			print("source_warehouse",source_warehouse)
 			item_code=dispatch_items.dispatch_items
 			print("item_code",item_code)
-			warehouse_qty=frappe.db.sql("""select actual_qty
-			from `tabBin`
+			warehouse_qty=frappe.db.sql("""select actual_qty 
+			from `tabBin`  
 			where item_code='"""+item_code+"""' and warehouse='"""+str(source_warehouse)+"""' """, as_dict=1)
 			print("warehouse_details",len(warehouse_qty))
 			if len(warehouse_qty)!=0:
 				warehouse_qty=warehouse_qty[0]['actual_qty']
 			else:
 				warehouse_qty=0
-
+			
 		for item in data:
 			items_data.append({'parent':d.parent,
 							'foreign_buyer':d.foreign_buyer,
@@ -113,14 +112,13 @@ def fetching_container_details(filters):
 							'total_quantity_of_item_in_container':d.total_quantity_of_item_in_container,
 							'scheduled_date':d.scheduled_date,
 							'dispatch_items':item.dispatch_items,
-							'dispatch_item_qty':item.total_quantity,
+							'dispatch_item_qty':d.total_quantity_of_item_in_container*item.qty/item.quantity,
 							'dispatch_item_uom':item.stock_uom,
 							'source_warehouse':source_warehouse,
 							'qty_available_in_source_warehouse':warehouse_qty
 							})
 	#print("items_data",items_data)
 	return items_data
-
 @frappe.whitelist()
 def create_invoice_stock_entry_material_trans(filters=None):
 
@@ -151,12 +149,13 @@ def create_invoice_stock_entry_material_trans(filters=None):
 				"doctype": "Stock Entry Detail"
 			}
 			# index = index+1 if index < len(data) else index
+			
 			outerJson['items'].append(innerJson)
-			print("Outer Json",outerJson['items'])
+			print("inner",innerJson)
+			print("Outer Json",outerJson)
 		doc = frappe.new_doc("Stock Entry")
 		doc.update(outerJson)
 		doc.save()
-		doc.submit()
 		print(doc.name)
 		return doc.name
 
@@ -201,8 +200,6 @@ def get_conditions(filters):
 	if filters.get("to_scheduled_date"):
 		conditions +='and tc.scheduled_date<= %s' % frappe.db.escape(filters.get("to_scheduled_date"), percent=False)
 
-	if filters.get("source_warehouse"):
-		conditions +='and tc.warehouse = %s' % frappe.db.escape(filters.get("source_warehouse"), percent=False)
-
+	
 	print("condition",conditions)
 	return conditions

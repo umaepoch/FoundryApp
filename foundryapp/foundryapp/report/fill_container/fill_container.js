@@ -48,6 +48,7 @@ frappe.query_reports["Fill Container"] = {
 			} else {
 				frappe.throw(__("Please Select The Container"))
 			}
+
 		});
 	}
 };
