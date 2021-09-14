@@ -36,7 +36,7 @@ def fetch_dispatch_items_report(week):
 	r_data = []
 
 	r_data = frappe.db.sql("""select tso.name, tso.po_no, tso.foreign_buyer_name, tso.final_destination,
-							tbi.item_code, tsi.pch_pallet_size, truncate((tsi.qty*tbi.qty)/tb.quantity, 0) as qty,
+							ti.item_name, tbi.item_code, tsi.pch_pallet_size, truncate((tsi.qty*tbi.qty)/tb.quantity, 0) as qty,
 							date_sub(date(tsi.delivery_date), interval dayofweek(tsi.delivery_date)-%s day) delivery_date
 							from `tabSales Order Item` as tsi
 							join `tabSales Order` as tso on tso.name = tsi.parent
@@ -54,7 +54,8 @@ def fetch_invoice_items_report(week):
 	r_data = []
 
 	r_data = frappe.db.sql("""select tso.name, tso.po_no, tso.foreign_buyer_name, tso.final_destination,
-							tsi.item_code, tsi.pch_pallet_size, tsi.qty, date_sub(date(tsi.delivery_date), interval dayofweek(tsi.delivery_date)-%s day) as delivery_date
+							tsi.item_code, ti.item_name, tsi.pch_pallet_size,
+							tsi.qty, date_sub(date(tsi.delivery_date), interval dayofweek(tsi.delivery_date)-%s day) as delivery_date
 							from `tabSales Order Item` as tsi
 							join `tabSales Order` as tso on tso.name = tsi.parent
 							join `tabItem` as ti on ti.item_code = tsi.item_code
@@ -143,27 +144,27 @@ def construct_report(data, filters):
 		for d in data:
 			if ((d["foreign_buyer_name"] == filters.get("foreign_buyer")) and (d["final_destination"] == filters.get("final_destination"))):
 				r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
-								d['final_destination'],d['item_code'],
+								d['final_destination'],d['item_name'],d['item_code'],
 								d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
 								d['Quantity Planned in Containers'],d['Quantity not Planned in Containers']])
 	elif filters.get("foreign_buyer"):
 		for d in data:
 			if d["foreign_buyer_name"] == filters.get("foreign_buyer"):
 				r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
-								d['final_destination'],d['item_code'],
+								d['final_destination'],d['item_name'],d['item_code'],
 								d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
 								d['Quantity Planned in Containers'],d['Quantity not Planned in Containers']])
 	elif filters.get("final_destination"):
 		for d in data:
 			if d["final_destination"] == filters.get("final_destination"):
 				r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
-								d['final_destination'],d['item_code'],
+								d['final_destination'],d['item_name'],d['item_code'],
 								d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
 								d['Quantity Planned in Containers'],d['Quantity not Planned in Containers']])
 	else:
 		for d in data:
 			r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
-							d['final_destination'],d['item_code'],
+							d['final_destination'],d['item_name'],d['item_code'],
 							d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
 							d['Quantity Planned in Containers'],d['Quantity not Planned in Containers']])
 	# print(r_data)
@@ -179,7 +180,8 @@ def get_columns(filters):
 			("Customer PO Number")+"::100",
 			("Foreign Buyer Name")+":150",
 			("Port")+"::100",
-			("Dispatch Item")+"::100",
+			("Item Name")+"::100",
+			("Item Code")+"::100",
 		    ("Pallet Size")+"::80",
 		    ("Quantity")+"::70",
 			("Delivery Date")+"::100",
@@ -192,7 +194,8 @@ def get_columns(filters):
 			("Customer PO Number")+"::100",
 			("Foreign Buyer Name")+":150",
 			("Port")+"::100",
-			("Invoice Item")+"::100",
+			("Item Name")+"::100",
+			("Item Code")+"::100",
 		    ("Pallet Size")+"::80",
 		    ("Quantity")+"::70",
 			("Delivery Date")+"::100",

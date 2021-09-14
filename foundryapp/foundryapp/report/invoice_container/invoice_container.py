@@ -37,9 +37,9 @@ def execute(filters=None):
 						cont_dict['item'],
 						cont_dict['pch_pallet_size'],
 						cont_dict['final_destination'],
-						cont_dict['container_warehouse'],
+						cont_dict['container_warehouse'] if cont_dict['container_warehouse'] else "",
 						cont_dict['total_quantity_of_item_in_container'],
-						cont_dict['scheduled_date'].strftime("%d-%m-%Y"),
+						cont_dict['scheduled_date'].strftime("%d-%m-%Y") if cont_dict['scheduled_date'] else "",
 						cont_dict['dispatch_items'],
 						cont_dict['dispatch_item_qty'],
 						cont_dict['dispatch_item_uom'],
@@ -58,13 +58,13 @@ def fetching_container_details(filters):
 	tcc.pallet_size,tcc.final_destination,
 	tcc.container_warehouse,
 	tcc.total_quantity_of_item_in_container,
-	tcc.scheduled_date  from `tabContainer Child` as tcc 
+	tcc.scheduled_date  from `tabContainer Child` as tcc
 	join `tabContainer` as tc on tcc.parent = tc.name %s""" % condition, as_dict=1)
 	print("items",items)
-	
+
 	for d in items:
 		print("item",d.item)
-		item=d.item	
+		item=d.item
 		container_warehouse=d.container_warehouse
 		data=frappe.db.sql("""select tbi.item_code as dispatch_items,ti.stock_uom,
 		tbi.qty,tb.quantity
@@ -72,19 +72,19 @@ def fetching_container_details(filters):
 		on tb.name = tbi.parent join `tabItem` as ti
 		on ti.item_code = tbi.item_code where tb.is_default=1 and tbi.docstatus=1 and ti.pch_made=1
 		and tb.item='"""+item+"""' """, as_dict=1)
-		
+
 		for dispatch_items in data:
 			item_code=dispatch_items.dispatch_items
 			print("item_code",item_code)
-			warehouse_qty=frappe.db.sql("""select actual_qty 
-			from `tabBin`  
+			warehouse_qty=frappe.db.sql("""select actual_qty
+			from `tabBin`
 			where item_code='"""+item_code+"""' and warehouse='"""+str(container_warehouse)+"""' """, as_dict=1)
 			print("warehouse_details",len(warehouse_qty))
 			if len(warehouse_qty)!=0:
 				warehouse_qty=warehouse_qty[0]['actual_qty']
 			else:
 				warehouse_qty=0
-			
+
 		for item in data:
 			items_data.append({'parent':d.parent,
 							'foreign_buyer':d.foreign_buyer,

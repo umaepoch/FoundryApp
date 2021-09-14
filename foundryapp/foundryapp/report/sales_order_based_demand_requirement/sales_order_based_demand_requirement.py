@@ -6,7 +6,7 @@ import frappe
 import itertools
 
 def execute(filters=None):
-	columns = get_columns()
+	columns = get_columns(filters)
 	show = filters.get("show_dispatch_items")
 	week = ""
 	day_of_week = {'Sunday': '1', 'Monday': '2', 'Tuesday': '3',
@@ -29,7 +29,7 @@ def get_report(sdi, week):
 
 	if sdi == 1:
 		r_data = frappe.db.sql("""select date_sub(date(tsi.delivery_date), interval dayofweek(tsi.delivery_date)-%s day) as delivery_date,
-							tbi.item_code, sum(truncate((tsi.qty*tbi.qty)/tb.quantity, 0)) as sum_quantiy,
+							ti.item_name, tbi.item_code, sum(truncate((tsi.qty*tbi.qty)/tb.quantity, 0)) as sum_quantiy,
 							ti.weight_per_unit,((sum(tsi.qty)*ti.weight_per_unit)/1000) as total_weight
 							from `tabSales Order Item` as tsi
 							join `tabSales Order` as tso on tso.name = tsi.parent
@@ -42,7 +42,8 @@ def get_report(sdi, week):
 
 	if sdi is None:
 		r_data = frappe.db.sql("""select date_sub(date(tsi.delivery_date), interval dayofweek(tsi.delivery_date)-%s day) as delivery_date,
-							tsi.item_code, sum(tsi.qty) as sum_quantiy, ti.weight_per_unit, ((sum(tsi.qty)*ti.weight_per_unit)/1000) as total_weight
+							ti.item_name, tsi.item_code, sum(tsi.qty) as sum_quantiy, ti.weight_per_unit,
+							((sum(tsi.qty)*ti.weight_per_unit)/1000) as total_weight
 							from `tabSales Order Item` as tsi
 							join `tabSales Order` as tso on tso.name = tsi.parent
 							join `tabItem` as ti on ti.item_code = tsi.item_code
@@ -98,7 +99,7 @@ def construct_report(w_data, r_data):
 			if wd['delivery_date'] == rd['delivery_date']:
 				res_tw += rd['total_weight']
 				res_sqty += rd['sum_quantiy']
-				report.append([rd['delivery_date'].strftime("%d-%m-%y"),rd['item_code'],rd['sum_quantiy'],
+				report.append([rd['delivery_date'].strftime("%d-%m-%Y"),rd['item_name'],rd['item_code'],rd['sum_quantiy'],
 								rd['weight_per_unit'],rd['total_weight'],""])
 				index += 1
 		if index >= 0:
@@ -107,19 +108,31 @@ def construct_report(w_data, r_data):
 			# print("index",(index-1)," :",datum)
 			report[index-1] = datum
 			print(report[index-1])
-	report.append([t_res,"",res_sqty,"",round(res_tw,3),round(res_twfw,3)])
+	report.append([t_res,"","",res_sqty,"",round(res_tw,3),round(res_twfw,3)])
 	print(report)
 	return report
 
 
-def get_columns():
+def get_columns(filters):
 	"""return columns"""
-	columns = [
-		("Delivery Date")+"::200",
-		("Dispatch Item/Invoice Item")+"::200",
-		("Sum - Quantity")+"::160",
-		("Weight (Kg)")+"::160",
-		("Total Weight (Tons)")+"::160",
-		("Total Weight for week")+"::160",
-		 ]
+	if filters.get("show_dispatch_items") == 1:
+		columns = [
+			("Delivery Date")+"::200",
+			("Item Name")+"::200",
+			("Item Code")+"::200",
+			("Sum - Quantity")+"::160",
+			("Weight (Kg)")+"::160",
+			("Total Weight (Tons)")+"::160",
+			("Total Weight for week")+"::160",
+			 ]
+	if filters.get("show_dispatch_items") is None:
+		columns = [
+			("Delivery Date")+"::200",
+			("Item Name")+"::200",
+			("Item Code")+"::200",
+			("Sum - Quantity")+"::160",
+			("Weight (Kg)")+"::160",
+			("Total Weight (Tons)")+"::160",
+			("Total Weight for week")+"::160",
+			 ]
 	return columns
