@@ -12,7 +12,7 @@ def execute(filters=None):
 
 
 def get_item_columns():
-	item_name = frappe.db.sql("""select tcc.item
+	item_name = frappe.db.sql("""select tcc.item, concat(tcc.item,"-", tcc.item_name) as absolute_name
 								from `tabContainer Child` as tcc
 								join `tabContainer` as tc on tcc.parent = tc.name
 								group by tcc.item
@@ -31,7 +31,7 @@ def get_columns():
 	item = get_item_columns()
 	if len(item) > 0:
 		for i in item:
-			columns.append(i.item+"::100")
+			columns.append(i.absolute_name+"::100")
 
 	columns += [("Total Result")+"::150"]
 	return columns
@@ -55,6 +55,7 @@ def construct_report():
 								from `tabContainer` as tc) as tc
 								group by tc.scheduled_date
 								order by tc.scheduled_date""", as_dict=1)
+	print(db_query)
 	if (len(db_query) > 0):
 		total = []
 		t_res = []
@@ -64,25 +65,26 @@ def construct_report():
 		for d in db_query:
 			res = []
 			data = []
-			date = d.scheduled_date
-			item = frappe.db.sql(query_str, (date), as_dict=1)
-			for i in item:
-				del i['scheduled_date']
-				items = list(i.values())
-				data.append(items)
-
-			sum = list(np.sum(data, axis = 0))
-			res.append(list(np.sum(data, axis = 0)))
-			ts = list(np.sum(res, axis = 1))
-			ts_res += ts[0]
-			t_res.append(list(np.sum(data, axis = 0)))
-			f_date = date.strftime("%d-%m-%Y")
-			sum.insert(0, f_date)
-			sum.insert(1, d.number_of_containers)
-			t_cont += d.number_of_containers
-			sum.insert(2, f_date)
-			sum.extend(ts)
-			rpt.append(list(sum))
+			if d.scheduled_date:
+				date = d.scheduled_date
+				item = frappe.db.sql(query_str, (date), as_dict=1)
+				for i in item:
+					del i['scheduled_date']
+					items = list(i.values())
+					data.append(items)
+				print(data)
+				sum = list(np.sum(data, axis = 0))
+				res.append(list(np.sum(data, axis = 0)))
+				ts = list(np.sum(res, axis = 1))
+				ts_res += ts[0]
+				t_res.append(list(np.sum(data, axis = 0)))
+				f_date = date.strftime("%d-%m-%Y")
+				sum.insert(0, f_date)
+				sum.insert(1, d.number_of_containers)
+				t_cont += d.number_of_containers
+				sum.insert(2, f_date)
+				sum.extend(ts)
+				rpt.append(list(sum))
 
 		total.append("Total Result")
 		total.append(t_cont)

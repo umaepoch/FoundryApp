@@ -10,16 +10,6 @@ def execute(filters=None):
 	data = construct_query()
 	return columns, data
 
-def get_container_invoice_item():
-	cont_inv_itm = frappe.db.sql("""select tcc.parent,tc.foreign_buyer,
-	 							tc.final_destination, tcc.item,
-								tcc.total_quantity_of_item_in_container
-								from `tabContainer Child` as tcc
-								join `tabContainer` as tc on tcc.parent = tc.name
-								order by tcc.parent""", as_dict=1)
-	# construct_query()
-	return cont_inv_itm
-
 def get_columns():
 	"""return columns"""
 	columns = [
@@ -31,13 +21,13 @@ def get_columns():
 	item = get_item_columns()
 	if len(item) > 0:
 		for i in item:
-			columns.append(i.item+"::100")
+			columns.append(i.absolute_name+"::150")
 
 	columns += [("Total Result")+"::150", ("Total Weight (Tonnes)")+"::150"]
 	return columns
 
 def get_item_columns():
-	item_name = frappe.db.sql("""select tcc.item
+	item_name = frappe.db.sql("""select tcc.item, concat(tcc.item,"-", tcc.item_name) as absolute_name
 								from `tabContainer Child` as tcc
 								join `tabContainer` as tc on tcc.parent = tc.name
 								group by tcc.item
@@ -53,7 +43,6 @@ def construct_query():
 
 	if (len(columns) > 0):
 		for col in columns:
-			# print(col.item)
 			query_str += ", if(tcc.item="+"'"+col.item+"'"+", truncate(tcc.total_quantity_of_item_in_container,0), 0) as "+"'"+col.item+"'"
 		query_str += "from `tabContainer Child` as tcc join `tabContainer` as tc on tcc.parent = tc.name where tcc.parent=%s order by tcc.parent"
 
