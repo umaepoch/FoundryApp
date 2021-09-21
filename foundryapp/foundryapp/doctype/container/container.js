@@ -338,17 +338,19 @@ frappe.ui.form.on("Container", "fetch_dispatch_items", function(frm, cdt, cdn) {
     var container_child = cont.container_details;
     // console.log(container_child)
     cur_frm.clear_table("dispatch_items");
-    var parent = cont.name;
-    let dispatch = fetch_dispatch(parent)
-    console.log("dispatch", dispatch)
-    dispatch.forEach((details) => {
+    var parent=cont.name;
+        let dispatch = fetch_dispatch(parent)
+       console.log("dispatch",dispatch)
+       dispatch.forEach((details) => {
         console.log("entering dispatch loo")
         var child = cur_frm.add_child("dispatch_items");
         frappe.model.set_value(child.doctype, child.name, "invoice_item", details['item']);
+        frappe.model.set_value(child.doctype, child.name, "item_name", details['item_name']);
         frappe.model.set_value(child.doctype, child.name, "pallet_size", details['pch_pallet_size']);
         frappe.model.set_value(child.doctype, child.name, "quantity_planned_in_container", details['total_quantity_of_item_in_container']);
         frappe.model.set_value(child.doctype, child.name, "dispatch_item", details['dispatch_items']);
         frappe.model.set_value(child.doctype, child.name, "quantity", details['total_quantity_of_item_in_container']);
+
         // cur_frm.refresh_field("dispatch_items");
     });
 
