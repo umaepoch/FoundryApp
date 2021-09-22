@@ -47,7 +47,8 @@ def fetch_so_details_foriegn_buyer(foreign_buyer):
 		else:
 			print("entered in else")
 			qty_in_so=data[0].qty_in_so;
-			r_data.append({'name':d.name,'po_no':d['po_no'],'foreign_buyer_name':d['foreign_buyer_name'],
+			if qty_in_so != 0.0:
+				r_data.append({'name':d.name,'po_no':d['po_no'],'foreign_buyer_name':d['foreign_buyer_name'],
 							'final_destination':d['final_destination'],'item_code':d['item_code'],'item_name':d['item_name'],
 							'pch_pallet_size':d['pch_pallet_size'],'transaction_date':d['transaction_date'],
 							'delivery_date':d['delivery_date'],'qty':d['qty'],
@@ -91,7 +92,8 @@ def fetch_so_details(foreign_buyer, final_destination, po_no):
 		else:
 			print("entered in else")
 			qty_in_so=data[0].qty_in_so;
-			r_data.append({'name':d.name,'po_no':d['po_no'],'foreign_buyer_name':d['foreign_buyer_name'],
+			if qty_in_so != 0.0:
+				r_data.append({'name':d.name,'po_no':d['po_no'],'foreign_buyer_name':d['foreign_buyer_name'],
 							'final_destination':d['final_destination'],'item_code':d['item_code'],'item_name':d['item_name'],
 							'pch_pallet_size':d['pch_pallet_size'],'transaction_date':d['transaction_date'],
 							'delivery_date':d['delivery_date'],'qty':d['qty'],
@@ -136,7 +138,8 @@ def fetch_so_details_po_no(foreign_buyer,po_no):
 		else:
 			print("entered in else")
 			qty_in_so=data[0].qty_in_so;
-			r_data.append({'name':d.name,'po_no':d['po_no'],'foreign_buyer_name':d['foreign_buyer_name'],
+			if qty_in_so != 0.0:
+				r_data.append({'name':d.name,'po_no':d['po_no'],'foreign_buyer_name':d['foreign_buyer_name'],
 							'final_destination':d['final_destination'],'item_code':d['item_code'],'item_name':d['item_name'],
 							'pch_pallet_size':d['pch_pallet_size'],'transaction_date':d['transaction_date'],
 							'delivery_date':d['delivery_date'],'qty':d['qty'],
@@ -181,7 +184,8 @@ def fetch_so_details_final_foreign(foreign_buyer, final_destination):
 		else:
 			print("entered in else")
 			qty_in_so=data[0].qty_in_so;
-			r_data.append({'name':d.name,'po_no':d['po_no'],'foreign_buyer_name':d['foreign_buyer_name'],
+			if qty_in_so != 0.0:
+				r_data.append({'name':d.name,'po_no':d['po_no'],'foreign_buyer_name':d['foreign_buyer_name'],
 							'final_destination':d['final_destination'],'item_code':d['item_code'],'item_name':d['item_name'],
 							'pch_pallet_size':d['pch_pallet_size'],'transaction_date':d['transaction_date'],
 							'delivery_date':d['delivery_date'],'qty':d['qty'],
