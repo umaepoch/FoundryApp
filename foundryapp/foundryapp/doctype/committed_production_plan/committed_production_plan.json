@@ -1,0 +1,86 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2021-09-14 12:00:48.396582",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "is_active",
+  "col_brk123",
+  "week_start_date",
+  "week_end_date",
+  "sec_brk234",
+  "get_items",
+  "items"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Document ID",
+   "options": "CMP-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "week_start_date",
+   "fieldtype": "Date",
+   "label": "Week Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "week_end_date",
+   "fieldtype": "Date",
+   "label": "Week End Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sec_brk234",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Committed Production Plan Items"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "col_brk123",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "get_items",
+   "fieldtype": "Button",
+   "label": "Get Items"
+  }
+ ],
+ "modified": "2021-09-16 09:55:22.603637",
+ "modified_by": "Administrator",
+ "module": "FoundryApp",
+ "name": "Committed Production Plan",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

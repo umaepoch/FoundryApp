@@ -4,6 +4,10 @@
 
 frappe.query_reports["Date Based Dispatch Report"] = {
 	"filters": [
-
+		{
+			"fieldname": "scheduled_date",
+			"label": __("Scheduled Shipment Date"),
+			"fieldtype": "Date"
+		}
 	]
 };

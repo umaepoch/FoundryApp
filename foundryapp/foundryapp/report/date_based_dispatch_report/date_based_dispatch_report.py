@@ -4,10 +4,27 @@
 from __future__ import unicode_literals
 import frappe
 import numpy as np
+import itertools
+import datetime
 
 def execute(filters=None):
 	columns = get_columns()
 	data = construct_report()
+	filter_data = []
+
+	if filters.get("scheduled_date"):
+		result = ["Total Result", "Total Result"]
+		date = datetime.datetime.strptime(filters.get("scheduled_date"), '%Y-%m-%d').strftime('%d-%m-%Y')
+
+		for d in data:
+			if d[0] == date:
+				filter_data.append(d)
+				result.insert(1, d[1])
+				result.extend(list(itertools.islice(d,3, len(d))))
+				filter_data.append(result)
+
+		return columns, filter_data
+
 	return columns, data
 
 
@@ -55,7 +72,7 @@ def construct_report():
 								from `tabContainer` as tc) as tc
 								group by tc.scheduled_date
 								order by tc.scheduled_date""", as_dict=1)
-	print(db_query)
+	# print(db_query)
 	if (len(db_query) > 0):
 		total = []
 		t_res = []
@@ -72,7 +89,7 @@ def construct_report():
 					del i['scheduled_date']
 					items = list(i.values())
 					data.append(items)
-				print(data)
+				# print(data)
 				sum = list(np.sum(data, axis = 0))
 				res.append(list(np.sum(data, axis = 0)))
 				ts = list(np.sum(res, axis = 1))

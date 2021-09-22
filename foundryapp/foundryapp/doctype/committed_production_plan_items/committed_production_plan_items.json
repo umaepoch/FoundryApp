@@ -1,0 +1,116 @@
+{
+ "creation": "2021-09-14 12:09:01.890381",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "start_date",
+  "week_ending",
+  "col_brk90",
+  "dispatch_item",
+  "dispatch_item_name",
+  "sec_09",
+  "production_quantity_committed",
+  "quantity_in_tonnes",
+  "average_production_per_day_units",
+  "average_production_per_day_tonnes",
+  "col7865",
+  "so_requirement",
+  "average_production_required_per_day",
+  "container_plan_requirement",
+  "average_production_required_per_day_container"
+ ],
+ "fields": [
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "week_ending",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Week Ending"
+  },
+  {
+   "fieldname": "dispatch_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Dispatch Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "production_quantity_committed",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Production Quantity Committed"
+  },
+  {
+   "fieldname": "quantity_in_tonnes",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Quantity in Tonnes"
+  },
+  {
+   "fieldname": "average_production_per_day_units",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Average Production Per Day Units"
+  },
+  {
+   "fieldname": "average_production_per_day_tonnes",
+   "fieldtype": "Float",
+   "label": "Average Production Per Day Tonnes"
+  },
+  {
+   "fieldname": "so_requirement",
+   "fieldtype": "Int",
+   "label": "SO Requirement"
+  },
+  {
+   "fieldname": "average_production_required_per_day",
+   "fieldtype": "Float",
+   "label": "Average Production Required Per Day"
+  },
+  {
+   "fieldname": "container_plan_requirement",
+   "fieldtype": "Float",
+   "label": "Container Plan Requirement"
+  },
+  {
+   "fieldname": "dispatch_item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Dispatch Item Name"
+  },
+  {
+   "fieldname": "average_production_required_per_day_container",
+   "fieldtype": "Float",
+   "label": "Average Production Required Per Day Container"
+  },
+  {
+   "fieldname": "col_brk90",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sec_09",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col7865",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-09-21 18:02:15.584110",
+ "modified_by": "Administrator",
+ "module": "FoundryApp",
+ "name": "Committed Production Plan Items",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

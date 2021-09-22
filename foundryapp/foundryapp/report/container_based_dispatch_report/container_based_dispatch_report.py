@@ -3,11 +3,25 @@
 
 from __future__ import unicode_literals
 import frappe
+import itertools
 import numpy as np
 
 def execute(filters=None):
 	columns = get_columns()
 	data = construct_query()
+	filter_data = []
+
+	if filters.get("container"):
+		result = ["Total Result", "", ""]
+
+		for d in data:
+			if d[0] == filters.get("container"):
+				filter_data.append(d)
+				result.extend(list(itertools.islice(d,3, len(d))))
+				filter_data.append(result)
+
+		return columns, filter_data
+
 	return columns, data
 
 def get_columns():
@@ -79,7 +93,7 @@ def construct_query():
 			sum.insert(1, d.foreign_buyer)
 			sum.insert(2, d.final_destination)
 			sum.extend(ts)
-			print(sum)
+			# print(sum)
 			sum.append(tones)
 			rpt.append(list(sum))
 		total.extend(list(np.sum(t_res, axis=0)))

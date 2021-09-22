@@ -4,6 +4,11 @@
 
 frappe.query_reports["Container Based Dispatch Report"] = {
 	"filters": [
-
+		{
+			"fieldname": "container",
+			"label": __("Container"),
+			"fieldtype": "Link",
+			"options": "Container"
+		}
 	]
 };
