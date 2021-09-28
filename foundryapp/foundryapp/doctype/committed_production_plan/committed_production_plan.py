@@ -51,10 +51,11 @@ def fetch_cmp_items(week_end_date):
 							if i['item_code']:
 								cont_req = frappe.db.sql("""select di.dispatch_item, cont_req, ROUND((di.cont_req/6), 3) as avg_prod_req_per_day_cont
 													from (
-													select dispatch_item, sum(quantity) as cont_req from `tabDispatch Items`
-													where dispatch_item =%s
-													group by dispatch_item
-													order by dispatch_item) as di""",(i['item_code']), as_dict = 1)
+													select tdi.dispatch_item, sum(tdi.quantity) as cont_req from `tabDispatch Items` as tdi
+													join `tabContainer` as tc on tc.name = tdi.parent
+													where dispatch_item =%s and tc.scheduled_date = %s
+													group by tdi.dispatch_item
+													order by tdi.dispatch_item) as di""",(i['item_code'], week_end_date), as_dict = 1)
 
 								if (len(cont_req) > 0):
 									for c in cont_req:
