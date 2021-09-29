@@ -7,11 +7,11 @@ import datetime
 
 def execute(filters=None):
 	columns = getColumns()
-	data = []
+	data = construct_report()
 
 	if filters.get("scheduled_date"):
 		date = datetime.datetime.strptime(filters.get("scheduled_date"), '%Y-%m-%d').strftime('%d-%m-%Y')
-		for d in construct_report():
+		for d in data:
 			if d['scheduled_shipment_date'] == date:
 				data.append([d['scheduled_shipment_date'], d['item_code'], d['item_name'],
 							d['concat'], d['so_requirement'], d['planned_dispatch'], d['under/over_delivery'],
@@ -19,7 +19,7 @@ def execute(filters=None):
 							d['shortage/excess_production'], d['cum_prod'], d['cum_shrt']])
 
 	if filters.get("scheduled_date") is None:
-		for d in construct_report():
+		for d in data:
 			data.append([d['scheduled_shipment_date'], d['item_code'], d['item_name'],
 						d['concat'], d['so_requirement'], d['planned_dispatch'], d['under/over_delivery'],
 						d['cum_so'], d['cum_dis'], d['cum_uo'], d['committed_production'],
@@ -106,7 +106,9 @@ def construct_report():
 				cum_pln_disp = 0
 
 			return data
-
+		else:
+			return r_data
+	return r_data
 
 
 def getColumns():
