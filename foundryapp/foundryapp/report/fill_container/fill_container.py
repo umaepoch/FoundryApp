@@ -17,7 +17,6 @@ def execute(filters=None):
 	columns = get_columns()
 	foreign_buyer = filters.get("foreign_buyer")
 	print("foreign_buyer",foreign_buyer)
-	global container
 	container = filters.get("container")
 	print("container",container)
 	from_scheduled_date = filters.get("from_scheduled_date")
@@ -49,8 +48,6 @@ def execute(filters=None):
 						cont_dict['scheduled_date'].strftime("%d-%m-%Y") if cont_dict['scheduled_date'] else "",
 						cont_dict['dispatch_items'],
 						cont_dict['dispatch_item_qty'],
-						cont_dict['qty_filled_in_container'],
-						cont_dict['qty_to_be_filled_in_container'],
 						cont_dict['dispatch_item_uom'],
 						cont_dict['source_warehouse'],
 						cont_dict['qty_available_in_source_warehouse']
@@ -77,7 +74,6 @@ def fetching_container_details(filters):
 		print("item",d.item)
 		item=d.item
 		total_qty_of_container=d.total_quantity_of_item_in_container
-		warehouse_qty=0
 		print("total_qty_of_container",total_qty_of_container)
 		data=frappe.db.sql("""select tbi.item_code as dispatch_items,ti.stock_uom,
 		tbi.qty,tb.quantity
@@ -85,36 +81,21 @@ def fetching_container_details(filters):
 		on tb.name = tbi.parent join `tabItem` as ti
 		on ti.item_code = tbi.item_code where tb.is_default=1 and tbi.docstatus=1 and ti.pch_made=1
 		and tb.item='"""+item+"""' """, as_dict=1)
-		
-		for item in data:
+		for dispatch_items in data:
 			source_warehouse=frappe.db.get_single_value("FoundryApp Settings", "production_entry_warehouse")
 			print("source_warehouse",source_warehouse)
-			item_code=item.dispatch_items
+			item_code=dispatch_items.dispatch_items
 			print("item_code",item_code)
 			warehouse_qty=frappe.db.sql("""select actual_qty
 			from `tabBin`
 			where item_code='"""+item_code+"""' and warehouse='"""+str(source_warehouse)+"""' """, as_dict=1)
-			print("warehouse_details",warehouse_qty)
+			print("warehouse_details",len(warehouse_qty))
 			if len(warehouse_qty)!=0:
 				warehouse_qty=warehouse_qty[0]['actual_qty']
 			else:
 				warehouse_qty=0
-			qty_filled_in_container=0
-			if container!=None:
-				fill_container=frappe.db.sql("""select total_inward_transactions_of_dispatch_item,
-				quantity_returned_to_allocation_warehouse
-				from `tabDispatch Items`
-				where dispatch_item='"""+item_code+"""' 
-				and parent='"""+str(d.parent)+"""' """, as_dict=1)
-				total_inward_transactions_of_dispatch_item=fill_container[0].total_inward_transactions_of_dispatch_item
-				if total_inward_transactions_of_dispatch_item==None:
-					total_inward_transactions_of_dispatch_item=0
-				quantity_returned_to_allocation_warehouse=fill_container[0].quantity_returned_to_allocation_warehouse
-				if quantity_returned_to_allocation_warehouse==None:
-					quantity_returned_to_allocation_warehouse=0
-				print("total_inward_transactions_of_dispatch_item=------",total_inward_transactions_of_dispatch_item)
-				print("quantity_returned_to_allocation_warehouse=------",quantity_returned_to_allocation_warehouse)
-				qty_filled_in_container=int(float(total_inward_transactions_of_dispatch_item))-int(float(quantity_returned_to_allocation_warehouse))
+
+		for item in data:
 			items_data.append({'parent':d.parent,
 							'foreign_buyer':d.foreign_buyer,
 							'so_no':d.so_no,
@@ -132,13 +113,11 @@ def fetching_container_details(filters):
 							'scheduled_date':d.scheduled_date,
 							'dispatch_items':item.dispatch_items,
 							'dispatch_item_qty':d.total_quantity_of_item_in_container*item.qty/item.quantity,
-							'qty_filled_in_container':qty_filled_in_container,
-							'qty_to_be_filled_in_container':d.total_quantity_of_item_in_container-(qty_filled_in_container),
 							'dispatch_item_uom':item.stock_uom,
 							'source_warehouse':source_warehouse,
 							'qty_available_in_source_warehouse':warehouse_qty
 							})
-	print("items_data",items_data)
+	#print("items_data",items_data)
 	return items_data
 
 def fetching_unique_container_details(filters):
@@ -164,37 +143,21 @@ def fetching_unique_container_details(filters):
 		on ti.item_code = tbi.item_code where tb.is_default=1 and tbi.docstatus=1 and ti.pch_made=1
 		and tb.item='"""+item+"""' """, as_dict=1)
 
-		
-
-		for item in data:
+		for dispatch_items in data:
+			item_code=dispatch_items.dispatch_items
+			print("item_code",item_code)
 			source_warehouse=frappe.db.get_single_value("FoundryApp Settings", "production_entry_warehouse")
 			print("source_warehouse",source_warehouse)
-			item_code=item.dispatch_items
-			print("item_code",item_code)
 			warehouse_qty=frappe.db.sql("""select actual_qty
 			from `tabBin`
 			where item_code='"""+item_code+"""' and warehouse='"""+str(source_warehouse)+"""' """, as_dict=1)
-			print("warehouse_details",warehouse_qty)
+			print("warehouse_details",len(warehouse_qty))
 			if len(warehouse_qty)!=0:
 				warehouse_qty=warehouse_qty[0]['actual_qty']
 			else:
 				warehouse_qty=0
-			qty_filled_in_container=0
-			if container!=None:
-				fill_container=frappe.db.sql("""select total_inward_transactions_of_dispatch_item,
-				quantity_returned_to_allocation_warehouse
-				from `tabDispatch Items`
-				where dispatch_item='"""+item_code+"""' 
-				and parent='"""+str(d.parent)+"""' """, as_dict=1)
-				total_inward_transactions_of_dispatch_item=fill_container[0].total_inward_transactions_of_dispatch_item
-				if total_inward_transactions_of_dispatch_item==None:
-					total_inward_transactions_of_dispatch_item=0
-				quantity_returned_to_allocation_warehouse=fill_container[0].quantity_returned_to_allocation_warehouse
-				if quantity_returned_to_allocation_warehouse==None:
-					quantity_returned_to_allocation_warehouse=0
-				print("total_inward_transactions_of_dispatch_item=------",total_inward_transactions_of_dispatch_item)
-				print("quantity_returned_to_allocation_warehouse=------",quantity_returned_to_allocation_warehouse)
-				qty_filled_in_container=int(float(total_inward_transactions_of_dispatch_item))-int(float(quantity_returned_to_allocation_warehouse))
+
+		for item in data:
 			items_data.append({'parent':d.parent,
 							'foreign_buyer':d.foreign_buyer,
 							'item':d.item,
@@ -206,42 +169,33 @@ def fetching_unique_container_details(filters):
 							'scheduled_date':d.scheduled_date,
 							'dispatch_items':item.dispatch_items,
 							'dispatch_item_qty':d.total_quantity_of_item_in_container*item.qty/item.quantity,
-							'qty_filled_in_container':qty_filled_in_container,
-							'qty_to_be_filled_in_container':d.total_quantity_of_item_in_container-(qty_filled_in_container),
 							'dispatch_item_uom':item.stock_uom,
 							'qty_available_in_source_warehouse':warehouse_qty
 							})
-	print("items_data",items_data)
+	#print("items_data",items_data)
 	return items_data
 
 @frappe.whitelist()
 def create_invoice_stock_entry_material_trans(filters=None):
 
 	data = fetching_unique_container_details(json.loads(filters))
-	print("Data---------- ", data)
-	
+	print("Data ", data)
+
 	company = frappe.db.get_single_value("Global Defaults", "default_company")
-	
-	new_data=[]
+
 	for sw in data:
-		if (sw['qty_available_in_source_warehouse'])!=0 and (sw['qty_to_be_filled_in_container'])!=0:
-			new_data.append(sw)
-    		
-		#if (sw['qty_available_in_source_warehouse'] < sw['dispatch_item_qty']) or (sw['qty_available_in_source_warehouse'] < sw['total_quantity_of_item_in_container']):
-			#del sw
-	if new_data==[]:
-		frappe.msgprint("Fill container already done for this")
-	
-	if new_data:
+		if (sw['qty_available_in_source_warehouse'] < sw['dispatch_item_qty']) or (sw['qty_available_in_source_warehouse'] < sw['total_quantity_of_item_in_container']):
+			frappe.throw("Not enought Quantity Available in Source Warehouse")
+
+	if data:
 		outerJson = {
 		"doctype": "Stock Entry",
 		"stock_entry_type": "Material Transfer",
 		"company": company,
-		"container_number":container,
 		"items": []
 		}
 		index = 1
-		for items in new_data:
+		for items in data:
 			innerJson = {
 				"item_code":items['dispatch_items'],
 				"s_warehouse":items['source_warehouse'],
@@ -255,73 +209,9 @@ def create_invoice_stock_entry_material_trans(filters=None):
 			outerJson['items'].append(innerJson)
 			print("inner",innerJson)
 			print("Outer Json",outerJson)
-			
 		doc = frappe.new_doc("Stock Entry")
 		doc.update(outerJson)
 		doc.save()
-		doc.submit()
-		for sw in new_data:
-			test=frappe.db.sql("""update `tabDispatch Items` 
-		set total_inward_transactions_of_dispatch_item ='"""+str(sw['total_quantity_of_item_in_container'])+"""',
-		quantity_returned_to_allocation_warehouse=0
-		where dispatch_item ='"""+str(sw['dispatch_items'])+"""' 
-		and parent='"""+str(container)+"""' """) 
-			frappe.db.commit()
-		print("test",test)		
-		print(doc.name)
-		return doc.name
-
-@frappe.whitelist()
-def create_return_stock_entry_material_trans(filters=None):
-
-	data = fetching_unique_container_details(json.loads(filters))
-	print("Data---------- ", data)
-	
-	company = frappe.db.get_single_value("Global Defaults", "default_company")
-	
-	new_data=[]
-	for sw in data:
-		if (sw['qty_available_in_source_warehouse'])!=0 and (sw['qty_filled_in_container'])!=0:
-			new_data.append(sw)
-    		
-	if new_data==[]:
-		frappe.msgprint("return container already done for this")
-	if new_data:
-		outerJson = {
-		"doctype": "Stock Entry",
-		"stock_entry_type": "Material Transfer",
-		"company": company,
-		"container_number":container,
-		"items": []
-		}
-		index = 1
-		for items in new_data:
-			innerJson = {
-				"item_code":items['dispatch_items'],
-				"s_warehouse":items['container_warehouse'],
-				"t_warehouse":items['source_warehouse'],
-				"qty":items['total_quantity_of_item_in_container'],
-				"uom": items['dispatch_item_uom'],
-				"doctype": "Stock Entry Detail"
-			}
-			# index = index+1 if index < len(data) else index
-
-			outerJson['items'].append(innerJson)
-			print("inner",innerJson)
-			print("Outer Json",outerJson)
-			
-		doc = frappe.new_doc("Stock Entry")
-		doc.update(outerJson)
-		doc.save()
-		doc.submit()
-		for sw in new_data:
-			test=frappe.db.sql("""update `tabDispatch Items` 
-		set total_inward_transactions_of_dispatch_item ='"""+str(sw['total_quantity_of_item_in_container'])+"""',
-		quantity_returned_to_allocation_warehouse=0
-		where dispatch_item ='"""+str(sw['dispatch_items'])+"""' 
-		and parent='"""+str(container)+"""' """) 
-			frappe.db.commit()
-		print("test",test)		
 		print(doc.name)
 		return doc.name
 
@@ -345,8 +235,6 @@ def get_columns():
 			_("Scheduled Date")+"::100",
 			_("Dispatch Item")+"::100",
 			_("Dispatch Item Quantity")+"::100",
-			_("Qty Filled In Container")+"::100",
-			_("Qty To Be Filled In Container")+"::100",
 			_("Dispatch Item UOM")+"::100",
 			_("Source Warehouse")+"::100",
 			_("Quantity Available in Source Warehouse")+"::100",

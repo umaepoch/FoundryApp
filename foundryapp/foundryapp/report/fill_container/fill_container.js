@@ -48,25 +48,7 @@ frappe.query_reports["Fill Container"] = {
 			} else {
 				frappe.throw(__("Please Select The Container"))
 			}
-			
-		});
-		report.page.add_inner_button(__("Return Container"), function() {
-			if (frappe.query_report.get_filter_value('container')) {
-				var filter = {
-					'foreign_buyer': frappe.query_report.get_filter_value('foreign_buyer') ? frappe.query_report.get_filter_value('foreign_buyer') : '',
-					'container': frappe.query_report.get_filter_value('container') ? frappe.query_report.get_filter_value('container') : '',
-					'from_scheduled_date': frappe.query_report.get_filter_value('from_scheduled_date') ? frappe.query_report.get_filter_value('from_scheduled_date') : '',
-					'to_scheduled_date': frappe.query_report.get_filter_value('to_scheduled_date') ? frappe.query_report.get_filter_value('to_scheduled_date') : '',
-					'source_warehouse': frappe.query_report.get_filter_value('source_warehouse') ? frappe.query_report.get_filter_value('source_warehouse') : ''
-				}
-				var doc_name = get_return_container_stock_material_trans(JSON.stringify(filter))
-				if (doc_name) {
-					console.log(doc_name)
-					frappe.set_route("Form/Stock Entry/"+doc_name)
-				}
-			} else {
-				frappe.throw(__("Please Select The Container"))
-			}
+
 		});
 	}
 };
@@ -75,24 +57,6 @@ function get_invoice_container_stock_material_trans(filters) {
 	let form
 	frappe.call({
 		method: 'foundryapp.foundryapp.report.fill_container.fill_container.create_invoice_stock_entry_material_trans',
-		args: {
-			filters: filters
-		},
-		async: false,
-		callback: function(r) {
-			if (r.message) {
-				console.log(typeof r.message)
-				form = r.message
-			}
-		}
-	})
-	return form
-}
-
-function get_return_container_stock_material_trans(filters) {
-	let form
-	frappe.call({
-		method: 'foundryapp.foundryapp.report.fill_container.fill_container.create_return_stock_entry_material_trans',
 		args: {
 			filters: filters
 		},
