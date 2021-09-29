@@ -7,30 +7,13 @@ import datetime
 
 def execute(filters=None):
 	columns = getColumns()
-	data = []
-	f_data = construct_report()
-
-	if filters.get("scheduled_date"):
-		date = datetime.datetime.strptime(filters.get("scheduled_date"), '%Y-%m-%d').strftime('%d-%m-%Y')
-		for d in f_data:
-			if d['scheduled_shipment_date'] == date:
-				data.append([d['scheduled_shipment_date'], d['item_code'], d['item_name'],
-							d['concat'], d['so_requirement'], d['planned_dispatch'], d['under/over_delivery'],
-							d['cum_so'], d['cum_dis'], d['cum_uo'], d['committed_production'],
-							d['shortage/excess_production'], d['cum_prod'], d['cum_shrt']])
-
-	if filters.get("scheduled_date") is None:
-		for d in f_data:
-			data.append([d['scheduled_shipment_date'], d['item_code'], d['item_name'],
-						d['concat'], d['so_requirement'], d['planned_dispatch'], d['under/over_delivery'],
-						d['cum_so'], d['cum_dis'], d['cum_uo'], d['committed_production'],
-						d['shortage/excess_production'], d['cum_prod'], d['cum_shrt']])
+	data = construct_report(filters)
 
 	return columns, data
 
 
 
-def construct_report():
+def construct_report(filters):
 	r_data = []
 	dispatch = frappe.db.sql("""select dispatch_item from `tabCommitted Production Plan Items`
 							group by dispatch_item
@@ -106,7 +89,23 @@ def construct_report():
 				cum_uo_dlv = 0
 				cum_pln_disp = 0
 
-			return data
+			if filters.get("scheduled_date"):
+				date = datetime.datetime.strptime(filters.get("scheduled_date"), '%Y-%m-%d').strftime('%d-%m-%Y')
+				for d in data:
+					if d['scheduled_shipment_date'] == date:
+						r_data.append([d['scheduled_shipment_date'], d['item_code'], d['item_name'],
+									d['concat'], d['so_requirement'], d['planned_dispatch'], d['under/over_delivery'],
+									d['cum_so'], d['cum_dis'], d['cum_uo'], d['committed_production'],
+									d['shortage/excess_production'], d['cum_prod'], d['cum_shrt']])
+				return r_data
+
+			if filters.get("scheduled_date") is None:
+				for d in data:
+					r_data.append([d['scheduled_shipment_date'], d['item_code'], d['item_name'],
+								d['concat'], d['so_requirement'], d['planned_dispatch'], d['under/over_delivery'],
+								d['cum_so'], d['cum_dis'], d['cum_uo'], d['committed_production'],
+								d['shortage/excess_production'], d['cum_prod'], d['cum_shrt']])
+				return r_data
 		else:
 			return r_data
 	return r_data
