@@ -25,7 +25,8 @@ def construct_report(filters):
  								join `tabCommitted Production Plan` as cmp on cmpi.parent = cmp.name
  								where cmp.is_active=1
  								order by cmpi.week_ending, cmpi.dispatch_item""", as_dict = 1)
-	if (len(cmp_details) > 0):
+
+	if (len(cmp_details) > 0) and cmp_details:
 		cum_so_rqd = 0
 		cum_pln_disp = 0
 		cum_uo_dlv = 0
@@ -67,7 +68,7 @@ def construct_report(filters):
 				data.append(cmp_json)
 		print(data[0])
 
-		if (len(data) > 0):
+		if (len(data) > 0) and data:
 
 			for i in dispatch:
 				for d in data:
