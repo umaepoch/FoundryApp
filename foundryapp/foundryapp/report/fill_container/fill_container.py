@@ -229,10 +229,7 @@ def create_invoice_stock_entry_material_trans(filters=None):
 				sw['qty_to_be_filled_in_container']=sw['qty_available_in_source_warehouse'] 	
 			new_data.append(sw)
     		
-		#if (sw['qty_available_in_source_warehouse'] < sw['qty_to_be_filled_in_container']):
-			#del sw
-	#if new_data==[]:
-		#frappe.msgprint("Fill container already done for this")
+		
 	
 	print("new_data",new_data) 
 	if new_data:
@@ -323,8 +320,7 @@ def create_return_stock_entry_material_trans(filters=None):
 			# index = index+1 if index < len(data) else index
 
 			outerJson['items'].append(innerJson)
-			print("inner",innerJson)
-			print("Outer Json",outerJson)
+			
 			
 		doc = frappe.new_doc("Stock Entry")
 		doc.update(outerJson)
@@ -336,7 +332,7 @@ def create_return_stock_entry_material_trans(filters=None):
 		where dispatch_item ='"""+str(sw['dispatch_items'])+"""' 
 		and parent='"""+str(container)+"""' """) 
 			frappe.db.commit()
-		print("test",test)		
+		#print("test",test)		
 		print(doc.name)
 		return doc.name
 
