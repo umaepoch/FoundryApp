@@ -19,6 +19,8 @@ def construct_report(filters):
 	cum_pln_disp = 0
 	cum_uo_dlv = 0
 	cum_prod_com = 0
+	print("get_dispatch() : ", get_dispatch())
+	print("get_production_plan() : ", get_production_plan())
 	dispatch = get_dispatch()
 	data = get_production_plan()
 
@@ -90,6 +92,7 @@ def get_production_plan():
 								join `tabCommitted Production Plan` as cmp on cmpi.parent = cmp.name
 								where cmp.is_active=1
 								order by cmpi.week_ending, cmpi.dispatch_item""", as_dict = 1)
+	print("Commited : ",cmp_details)
 
 	if cmp_details != None and (len(cmp_details) > 0):
 		for cmp in cmp_details:
@@ -112,11 +115,13 @@ def get_production_plan():
 
 
 def get_dispatch():
-	dispatch = frappe.db.sql("""select dispatch_item from `tabCommitted Production Plan Items`
-							group by dispatch_item
+	dispatch = frappe.db.sql("""select cmpi.dispatch_item from `tabCommitted Production Plan Items` as cmpi
+							join `tabCommitted Production Plan` as cmp on cmpi.parent = cmp.name
+							where cmp.is_active=1
+							group by cmpi.dispatch_item
 							order by dispatch_item""", as_dict = 1)
+	print("Dispatch Items : ",dispatch)
 
 	if dispatch != None and (len(dispatch) > 0):
 		return dispatch
-	else:
-		return []
+	return ""
