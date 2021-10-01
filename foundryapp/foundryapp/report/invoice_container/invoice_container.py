@@ -99,7 +99,7 @@ def fetching_container_details(filters):
 							'dispatch_item_uom':item.stock_uom,
 							'qty_available_in_source_warehouse':warehouse_qty
 							})
-	#print("items_data",items_data)
+	print("items_data",items_data)
 	return items_data
 
 @frappe.whitelist()
@@ -112,7 +112,7 @@ def create_invoice_stock_entry_manufacture(filters):
 
 		for sw in data:
 			if (sw['qty_available_in_source_warehouse'] < sw['dispatch_item_qty']) or (sw['qty_available_in_source_warehouse'] < sw['total_quantity_of_item_in_container']):
-				frappe.throw("Not enought Quantity Available in Source Warehouse")
+				frappe.throw("Not Enough Quantity Available in Source Warehouse")
 
 		if data:
 			min_index = 1
@@ -168,7 +168,16 @@ def create_invoice_stock_entry_manufacture(filters):
 						doc_dispatch = frappe.new_doc("Stock Entry")
 						doc_dispatch.update(outerJson_dispatch)
 						doc_dispatch.save()
-						#doc_dispatch.submit()
+						doc_dispatch.submit()
+
+						if doc_dispatch.docstatus == 1:
+							if (len(doc_dispatch.items) > 0):
+								for i in doc_dispatch.items:
+									cont_doc = frappe.db.get_value('Dispatch Items', {'parent': items['parent'], 'dispatch_item': i.item_code}, 'name')
+									if cont_doc:
+										disp_doc = frappe.get_doc('Dispatch Items', cont_doc)
+										disp_doc.quantity_manufactured = i.qty
+										disp_doc.save()
 
 						# innerJson_invoice = {
 						# 	"item_code": items['item'],
@@ -187,7 +196,7 @@ def create_invoice_stock_entry_manufacture(filters):
 			return "success!!!!"
 	except Exception as ex:
 		print("Exception : ",ex)
-		return ex
+		return "Exception"
 
 
 def get_columns():
