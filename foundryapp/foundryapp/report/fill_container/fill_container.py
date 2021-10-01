@@ -302,8 +302,22 @@ def create_invoice_stock_entry_material_trans(filters=None):
 			sum_total_inward_transactions_of_dispatch_item=sum_of_fill_qty[0]['inward_qty']
 			if sum_total_inward_transactions_of_dispatch_item==None:
 				sum_total_inward_transactions_of_dispatch_item=sum_of_fill_qty[0]['qty']
+			actual_qty=frappe.db.sql("""select actual_qty
+			from `tabBin`
+			where item_code='"""+str(sw['dispatch_items'])+"""' and warehouse='"""+str(sw['container_warehouse'])+"""' """, as_dict=1)
+			print("actual_qty-------",actual_qty)
+			
+			if len(actual_qty)!=0:
+				actual_qty=actual_qty[0]['actual_qty']
+			else:
+				actual_qty=0
 			test=frappe.db.sql("""update `tabDispatch Items` 
 			set total_inward_transactions_of_dispatch_item ='"""+str(sum_total_inward_transactions_of_dispatch_item)+"""'
+			where dispatch_item ='"""+str(sw['dispatch_items'])+"""' 
+			and parent='"""+str(container)+"""' """) 
+			frappe.db.commit()
+			warehouse_container=frappe.db.sql("""update `tabDispatch Items` 
+			set current_quantity_in_container_warehouse ='"""+str(actual_qty)+"""'
 			where dispatch_item ='"""+str(sw['dispatch_items'])+"""' 
 			and parent='"""+str(container)+"""' """) 
 			frappe.db.commit()
@@ -364,12 +378,25 @@ def create_return_stock_entry_material_trans(filters=None):
 			sum_total_return_transactions_of_dispatch_item=sum_of_fill_qty[0]['inward_qty']
 			if sum_total_return_transactions_of_dispatch_item==None:
 				sum_total_return_transactions_of_dispatch_item=0
+			actual_qty=frappe.db.sql("""select actual_qty
+			from `tabBin`
+			where item_code='"""+str(sw['dispatch_items'])+"""' and warehouse='"""+str(sw['container_warehouse'])+"""' """, as_dict=1)
+			print("actual_qty-------",actual_qty)
+			
+			if len(actual_qty)!=0:
+				actual_qty=actual_qty[0]['actual_qty']
+			else:
+				actual_qty=0
 			test=frappe.db.sql("""update `tabDispatch Items` 
 			set quantity_returned_to_allocation_warehouse ='"""+str(sum_total_return_transactions_of_dispatch_item)+"""'
 			where dispatch_item ='"""+str(sw['dispatch_items'])+"""' 
 			and parent='"""+str(container)+"""' """) 
 			frappe.db.commit()
-			
+			warehouse_container=frappe.db.sql("""update `tabDispatch Items` 
+			set current_quantity_in_container_warehouse ='"""+str(actual_qty)+"""'
+			where dispatch_item ='"""+str(sw['dispatch_items'])+"""' 
+			and parent='"""+str(container)+"""' """) 
+			frappe.db.commit()
 		print("test",test)		
 		print(doc.name)
 		return doc.name
