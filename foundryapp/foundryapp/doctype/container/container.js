@@ -520,7 +520,7 @@ frappe.ui.form.on("Container", "validate", function(frm, cdt, cdn) {
     console.log("warehouse", warehouse);
     var container_warehouse = fetch_warehouse_container(warehouse)
     console.log("container_warehouse", container_warehouse)
-    if (container_warehouse != 0) {
+    if (container_warehouse > 1) {
         frappe.msgprint("Warehouse already existed for another container")
         frappe.validated = false;
     }
