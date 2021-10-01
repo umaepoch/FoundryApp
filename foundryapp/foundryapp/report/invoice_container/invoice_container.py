@@ -173,9 +173,15 @@ def create_invoice_stock_entry_manufacture(filters):
 						if doc_dispatch.docstatus == 1:
 							if (len(doc_dispatch.items) > 0):
 								for i in doc_dispatch.items:
-									cont_doc = frappe.db.get_value('Dispatch Items', {'parent': items['parent'], 'dispatch_item': i.item_code}, 'name')
-									if cont_doc:
-										disp_doc = frappe.get_doc('Dispatch Items', cont_doc)
+									cont_doc_invoice = frappe.db.get_value('Container Child', {'parent': items['parent'], 'item': i.item_code}, 'name')
+									cont_doc_dispatch = frappe.db.get_value('Dispatch Items', {'parent': items['parent'], 'dispatch_item': i.item_code}, 'name')
+									if cont_doc_invoice:
+										inv_doc = frappe.get_doc('Container Child', cont_doc_invoice)
+										inv_doc.quantity_invoiced = i.qty
+										inv_doc.save()
+
+									if cont_doc_dispatch:
+										disp_doc = frappe.get_doc('Dispatch Items', cont_doc_dispatch)
 										disp_doc.quantity_manufactured = i.qty
 										disp_doc.save()
 
