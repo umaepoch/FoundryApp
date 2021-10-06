@@ -150,52 +150,85 @@ frappe.ui.form.on("Container", "validate", function(frm, cdt, cdn) {
 
 frappe.ui.form.on("Container", "after_save", function(frm, cdt, cdn) {
     var d = locals[cdt][cdn];
-    var parent = frm.doc.name;
+    var parent = d.name;
     var foreign_buyer = d.foreign_buyer;
     var final_destination = d.final_destination;
-    var container_child = frm.doc.container_details;
+    var container_child = d.container_details;
     var scheduled_date = d.scheduled_date;
     var warehouse = d.warehouse;
     var item = "";
     var so_no = "";
     var sum_quantiy = 0
 
-    for (var i = 0; i < container_child.length; i++) {
-        var qty_to_be_filled = container_child[i].qty_to_be_filled
-        var qty_left_in_so = container_child[i].qty_left_in_so
+    if (container_child) {
+      container_child.forEach((child) => {
+        var qty_to_be_filled = child.qty_to_be_filled
+        // console.log(child)
+        var qty_left_in_so = child.qty_left_in_so
         if (scheduled_date) {
-            container_child[i].scheduled_date = scheduled_date
+          child.scheduled_date = scheduled_date
         }
         if (warehouse) {
-            container_child[i].container_warehouse = warehouse
+          child.container_warehouse = warehouse
         }
-        item = container_child[i].item;
-        so_no = container_child[i].so_no;
-        console.log("qty_to_be_filled", qty_to_be_filled)
-        console.log("qty_left_in_so", qty_left_in_so)
-        container_child[i]['so_quantity_not_placed_in_containers_before_this_container'] = qty_left_in_so;
+        item = child.item;
+        so_no = child.so_no;
+        var so_qty_bfr_cont = qty_left_in_so;
         var qty_not_placed_in_container = qty_left_in_so - qty_to_be_filled;
-        console.log("qty_not_placed_in_container", qty_not_placed_in_container)
-        container_child[i]['so_quantity_not_placed_in_containers_after_this_container'] = qty_not_placed_in_container;
+        var so_qty_aft_cont = qty_not_placed_in_container;
         var qty = sum_of_qty(parent, item);
-        console.log("qty", qty);
-        container_child[i].total_quantity_of_item_in_container = qty;
+        // // child.total_quantity_of_item_in_container = qty;
+        // cur_frm.refresh()
+        // cur_frm.refresh_field("container_details")
+        // // frm.reload_doc()
+        // frappe.db.set_value('Container Child', child.name, {
+        //   so_quantity_not_placed_in_containers_before_this_container: so_qty_bfr_cont,
+        //   so_quantity_not_placed_in_containers_after_this_container: so_qty_aft_cont,
+        //   total_quantity_of_item_in_container: qty
+        // }).then(r => {
+        //   let doc = r.message;
+        //   console.log(doc);
+        // })
+
+        var c_name = child.name
+        set_child_value(parent, c_name, so_qty_bfr_cont, so_qty_aft_cont, qty, frm)
+
         let weight_of_item = fetch_item_weight(item)
         let total_qty = qty_to_be_filled * weight_of_item
         sum_quantiy += total_qty
-    } //end of for loop
-
+      });
+    }
     sum_quantiy = sum_quantiy / 1000
-    // console.log(d)
-    create_dispatch_items(JSON.stringify(d),sum_quantiy, frm)
+    create_dispatch_items(d.name,sum_quantiy, frm)
 });
 
-
-function create_dispatch_items(child,tl_qty, frm) {
+function set_child_value(doc, name, so_qty_bfr_cont, so_qty_aft_cont, qty, frm) {
   frappe.call({
-    'method': 'foundryapp.foundryapp.doctype.container.container.create_container_dispatch_items',
+    method : 'foundryapp.foundryapp.doctype.container.container.set_child_value',
     args : {
-      'cont_child': child,
+      'doc_name': doc,
+      'name': name,
+      'so_qty_bfr_cont': so_qty_bfr_cont,
+      'so_qty_aft_cont': so_qty_aft_cont,
+      'qty': qty
+    },
+    async: false,
+    callback: function(r){
+      if (r.message.Exception) {
+        frappe.throw(__(r.message.Exception))
+      } else {
+        console.log(r)
+        frm.reload_doc()
+      }
+    }
+  })
+}
+
+function create_dispatch_items(name,tl_qty, frm) {
+  frappe.call({
+    method: 'foundryapp.foundryapp.doctype.container.container.create_container_dispatch_items',
+    args : {
+      'cont_name': name,
       'qty': tl_qty
     },
     async: false,
@@ -215,6 +248,7 @@ frappe.ui.form.on("Container", "validate", function(frm, cdt, cdn) {
     var checked_so = {};
     var is_po_matching = true;
     var d = locals[cdt][cdn];
+    console.log(d)
     var container_child = frm.doc.container_details;
     var open_po_count = 0;
     var closed_po_count = 0;

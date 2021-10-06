@@ -157,45 +157,75 @@ def validate_container_exist(foreign_buyer, final_destination):
 
 
 @frappe.whitelist()
-def create_container_dispatch_items(cont_child, qty):
+def create_container_dispatch_items(cont_name, qty):
 	try:
-		child = json.loads(cont_child)
-		print(child)
+		# child = json.loads(cont_child)
+		print(cont_name)
 		outer_json = {
 			'total_planned_net_weight_of_container': qty,
 			'dispatch_items': []
 		}
-		# print(child['name'])
-		for cd in child['container_details']:
-			# print(cd['item'])
-			dispatch_item = get_dispatch(cd['item'])
-			# print("got dispatch : ", dispatch_item)
 
-			for d in dispatch_item:
-				if d['item_code']:
-					planned_qty = 0
+		dispatch_item = frappe.db.sql("""select tcc.parent, tcc.item, tcc.item_name, tcc.pallet_size,
+									tcc.total_quantity_of_item_in_container as quantity_plnd_in_cont,
+									tbi.item_code,
+									truncate((tcc.total_quantity_of_item_in_container*tbi.qty)/tb.quantity, 0) as quantity
+									from `tabContainer Child` as tcc
+									join `tabBOM` as tb on tcc.item = tb.item
+									join `tabBOM Item` as tbi on tb.name = tbi.parent
+									join `tabItem` as ti on ti.item_code = tbi.item_code
+									where ti.pch_made=1 and tb.is_default=1 and tbi.docstatus=1 and  tcc.parent=%s
+									group by tbi.item_code""",(cont_name), as_dict = 1)
 
-					if 'total_quantity_of_item_in_container' in cd:
-						planned_qty = cd['total_quantity_of_item_in_container']
-
-					quantity = planned_qty * d.di_qty / d.in_qty
+		if (len(dispatch_item) > 0):
+			for di in dispatch_item:
+				if di['parent']:
 					dispatch_json = {
-						'parent': cd['parent'],
-						'invoice_item': cd['item'],
-						'item_name': cd['item_name'],
-						'pallet_size': cd['pallet_size'],
-						'quantity_planned_in_container': planned_qty,
-						'dispatch_item': d.item_code,
-						'quantity': quantity
+						'parent': di['parent'],
+						'invoice_item': di['item'],
+						'item_name': di['item_name'],
+						'pallet_size': di['pallet_size'],
+						'quantity_planned_in_container': di['quantity_plnd_in_cont'],
+						'dispatch_item': di['item_code'],
+						'quantity': di['quantity']
 					}
 					outer_json['dispatch_items'].append(dispatch_json)
 
-		print(outer_json['dispatch_items'])
-		doc = frappe.get_doc('Container', child['name'])
-		doc.update(outer_json)
-		doc.save()
+			doc = frappe.get_doc('Container', cont_name)
+			doc.update(outer_json)
+			doc.save()
+		# print(child['name'])
+		# for cd in child['container_details']:
+			# print(cd)
+			# dispatch_item = get_dispatch(cd['item'])
+			# print("got dispatch : ", dispatch_item)
 
-		return "success!!" if doc.docstatus == 0 else ""
+			# for d in dispatch_item:
+			# 	if d['item_code']:
+			# 		planned_qty = 0
+			#
+			# 		if 'total_quantity_of_item_in_container' in cd:
+			# 			planned_qty = cd['total_quantity_of_item_in_container']
+			#
+			# 		quantity = planned_qty * d.di_qty / d.in_qty
+			# 		dispatch_json = {
+			# 			'parent': cd['parent'],
+			# 			'invoice_item': cd['item'],
+			# 			'item_name': cd['item_name'],
+			# 			'pallet_size': cd['pallet_size'],
+			# 			'quantity_planned_in_container': planned_qty,
+			# 			'dispatch_item': d.item_code,
+			# 			'quantity': quantity
+			# 		}
+			# 		outer_json['dispatch_items'].append(dispatch_json)
+
+		# print(outer_json['dispatch_items'])
+		# doc = frappe.get_doc('Container', child['name'])
+		# doc.update(outer_json)
+		# doc.save()
+
+		# return "success!!" if doc.docstatus == 0 else ""
+		return "success!!"
 	except Exception as ex:
 		print(ex)
 		return {"Exception": ex}
@@ -237,6 +267,29 @@ def qty_sum(parent,item):
 								where parent=%s and item=%s""",
 							(parent, item), as_dict=1)
 	return sum_of_quantity[0].total_qty
+
+@frappe.whitelist()
+def set_child_value(doc_name, name, so_qty_bfr_cont, so_qty_aft_cont, qty):
+	try:
+		# print(doc_name)
+		# print(so_qty_bfr_cont)
+		# print(so_qty_aft_cont)
+		# print(qty)
+		flag = frappe.db.set_value("Container Child", name,
+				{
+				'so_quantity_not_placed_in_containers_before_this_container': so_qty_bfr_cont,
+				'so_quantity_not_placed_in_containers_after_this_container': so_qty_aft_cont,
+				'total_quantity_of_item_in_container': qty
+						})
+		# doc = frappe.get_doc("Container", doc_name)
+		# # doc.update()
+		# doc.save()
+
+		return "success!!"
+	except Exception as ex:
+		print(ex)
+		return {"Exception": ex}
+
 
 @frappe.whitelist()
 def container_details(foreign_buyer,final_destination,so_no,item):
