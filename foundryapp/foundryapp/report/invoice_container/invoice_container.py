@@ -193,6 +193,8 @@ def create_invoice_stock_entry_manufacture(filters):
 				sls_outer_json = {
 					"customer": customer,
 					"foreign_buyer_name":foreign_buyer_name,
+					"tax_invoice_number":1234,
+					"item_group":"Valve Box",
 					"items": []
 				}
 
