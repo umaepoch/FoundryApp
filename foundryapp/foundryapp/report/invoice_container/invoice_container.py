@@ -53,7 +53,7 @@ def execute(filters=None):
 def fetching_container_details(filters):
 	condition = get_conditions(filters)
 	items_data=[]
-	items = frappe.db.sql("""select  distinct tcc.item,
+	items = frappe.db.sql("""select  distinct tcc.item,tcc.so_no,
 	tc.foreign_buyer,tcc.parent,
 	tcc.pallet_size,tcc.final_destination,
 	tcc.container_warehouse,
@@ -111,12 +111,14 @@ def create_invoice_stock_entry_manufacture(filters):
 
 
 		for sw in data:
+			
 			if (sw['qty_available_in_source_warehouse'] < sw['dispatch_item_qty']) or (sw['qty_available_in_source_warehouse'] < sw['total_quantity_of_item_in_container']):
 				frappe.throw("Not Enough Quantity Available in Source Warehouse")
 
 		if data:
 			min_index = 1
 			max_index = len(data)
+			sls_inv_data = []
 			for items in data:
 				outerJson_dispatch = {
 					"doctype": "Stock Entry",
@@ -125,14 +127,6 @@ def create_invoice_stock_entry_manufacture(filters):
 					"company": company,
 					"items": []
 				}
-
-				# outerJson_invoice = {
-				# 	"doctype": "Stock Entry",
-				# 	"title": "Manufacture",
-				# 	"stock_entry_type": "Manufacture",
-				# 	"company": company,
-				# 	"items": []
-				# }
 
 				innerJson = {
 					"item_code":items['dispatch_items'],
@@ -162,7 +156,6 @@ def create_invoice_stock_entry_manufacture(filters):
 							"allow_zero_valuation_rate": 1,
 							"doctype": "Stock Entry Detail"
 						}
-
 						outerJson_dispatch['items'].append(innerJson_dispatch)
 						outerJson_dispatch['items'].append(innerJson_invoice)
 						doc_dispatch = frappe.new_doc("Stock Entry")
@@ -173,31 +166,48 @@ def create_invoice_stock_entry_manufacture(filters):
 						if doc_dispatch.docstatus == 1:
 							if (len(doc_dispatch.items) > 0):
 								for i in doc_dispatch.items:
-									cont_doc_invoice = frappe.db.get_value('Container Child', {'parent': items['parent'], 'item': i.item_code}, 'name')
-									cont_doc_dispatch = frappe.db.get_value('Dispatch Items', {'parent': items['parent'], 'dispatch_item': i.item_code}, 'name')
+									cont_doc_invoice = frappe.db.get_value('Container Child',
+									 					{'parent': items['parent'], 'item': i.item_code},
+														['name', 'item','so_no'], as_dict = 1)
+									print("cont_doc_invoice",cont_doc_invoice)
+									# cont_doc_dispatch = frappe.db.get_value('Dispatch Items', {'parent': items['parent'], 'dispatch_item': i.item_code}, 'name')
 									if cont_doc_invoice:
-										inv_doc = frappe.get_doc('Container Child', cont_doc_invoice)
-										inv_doc.quantity_invoiced = i.qty
-										inv_doc.save()
-
-									if cont_doc_dispatch:
-										disp_doc = frappe.get_doc('Dispatch Items', cont_doc_dispatch)
-										disp_doc.quantity_manufactured = i.qty
-										disp_doc.save()
-
-						# innerJson_invoice = {
-						# 	"item_code": items['item'],
-						# 	"t_warehouse": items['container_warehouse'],
-						# 	"qty": items['total_quantity_of_item_in_container'],
-						# 	"uom": items['dispatch_item_uom'],
-						# 	"allow_zero_valuation_rate": 1,
-						# 	"doctype": "Stock Entry Detail"
-						# }
-						# outerJson_invoice['items'].append(innerJson_invoice)
-						# doc_invoice =  frappe.new_doc("Stock Entry")
-						# doc_invoice.update(outerJson_invoice)
-						# doc_invoice.save()
+										inv_doc = frappe.get_doc('Container Child', cont_doc_invoice.name)
+										print("inv_doc",inv_doc)
+										item_json = {
+											'item':cont_doc_invoice.item,
+											'parent': inv_doc.parent,
+											'quantity': i.qty,
+											'sales_order':cont_doc_invoice.so_no
+										}
+										sls_inv_data.append(item_json)
+										
 					min_index += 1
+
+			if (len(sls_inv_data) > 0):
+				print("sls_inv_data",sls_inv_data)
+				foreign_buyer_name = frappe.db.get_value('Container', {'name': sls_inv_data[0]['parent']}, 'foreign_buyer')
+				print("foreign_buyer_name",foreign_buyer_name)
+				customer = frappe.db.get_value('Sales Order', {'name': sls_inv_data[0]['sales_order']}, 'customer')
+				print("customer",customer)
+				sls_outer_json = {
+					"customer": customer,
+					"foreign_buyer_name":foreign_buyer_name,
+					"items": []
+				}
+
+				for s in sls_inv_data:
+					if s:
+						innerJson = {
+							"item_code": s['item'],
+							"qty": s['quantity'],
+							"sales_order":s['sales_order']
+						}
+						sls_outer_json["items"].append(innerJson)
+
+				doc_sales_inv = frappe.new_doc('Sales Invoice')
+				doc_sales_inv.update(sls_outer_json)
+				doc_sales_inv.save()
 
 			return "success!!!!"
 	except Exception as ex:

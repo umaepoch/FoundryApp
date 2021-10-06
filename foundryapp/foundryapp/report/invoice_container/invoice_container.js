@@ -43,7 +43,7 @@ frappe.query_reports["Invoice Container"] = {
 				var doc_name = get_invoice_container_stock(JSON.stringify(filter))
 				if (doc_name) {
 					console.log(doc_name)
-					frappe.set_route("List/Stock Entry/")
+					frappe.set_route("List/Sales Invoice/")
 				}
 			} else {
 				frappe.throw(__("Please Select The Container"))
