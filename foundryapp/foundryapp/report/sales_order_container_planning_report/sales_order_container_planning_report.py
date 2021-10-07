@@ -228,10 +228,12 @@ def add_warehouse_qty(data, filters):
 			# print(warehouse_qty)
 			if len(warehouse_qty) > 0:
 				for wr in warehouse_qty:
-					if wr.actual_qty:
+					if wr.actual_qty != 0:
 						d['warehouse_qty'] = wr.actual_qty
 					else:
 						d['warehouse_qty'] = 0
+			else:
+				d['warehouse_qty'] = 0
 		# print(data)
 		return data
 
