@@ -19,7 +19,7 @@ frappe.query_reports["Sales Order Container Planning Report"] = {
 			"fieldname": "final_destination",
 			"label": __("Final Destination"),
 			"fieldtype": "Link",
-			"options": "Ports"
+			"options": "Port Of Dispatch"
 		}
 	],
 	onload: function(report) {
@@ -44,8 +44,12 @@ frappe.query_reports["Sales Order Container Planning Report"] = {
 						"fieldname": "final_destination",
 						"label": __("Final Destination"),
 						"fieldtype": "Link",
-						"options": "Ports",
-        				"reqd": 1,
+						"options": "Port Of Dispatch",
+					},
+					{
+						"fieldname": "customer_po_number",
+						"label": __("Customer PO No"),
+						"fieldtype": "Data",
 					},
 				],
 				primary_action: function(values){

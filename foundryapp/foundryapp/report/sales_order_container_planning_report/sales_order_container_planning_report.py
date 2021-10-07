@@ -27,7 +27,8 @@ def execute(filters=None):
 		data = fetch_invoice_items_report(week)
 
 	datum = generate_qty_plan(data, filters)
-	sor_data = construct_report(datum, filters)
+	wr_data = add_warehouse_qty(datum, filters)
+	sor_data = construct_report(wr_data, filters)
 	return columns, sor_data
 
 
@@ -142,33 +143,99 @@ def construct_report(data, filters):
 
 	if filters.get("foreign_buyer") and filters.get("final_destination"):
 		for d in data:
-			if ((d["foreign_buyer_name"] == filters.get("foreign_buyer")) and (d["final_destination"] == filters.get("final_destination"))):
-				r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
-								d['final_destination'],d['item_name'],d['item_code'],
-								d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
-								d['Quantity Planned in Containers'],d['Quantity not Planned in Containers']])
+
+			if filters.get("show_dispatch_items") == 1:
+				if ((d["foreign_buyer_name"] == filters.get("foreign_buyer")) and (d["final_destination"] == filters.get("final_destination"))):
+					r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
+									d['final_destination'],d['item_name'],d['item_code'],
+									d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
+									d['Quantity Planned in Containers'],d['Quantity not Planned in Containers'],
+									d['source_warehouse'], d['warehouse_qty']])
+
+			if filters.get("show_dispatch_items") is None:
+				if ((d["foreign_buyer_name"] == filters.get("foreign_buyer")) and (d["final_destination"] == filters.get("final_destination"))):
+					r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
+									d['final_destination'],d['item_name'],d['item_code'],
+									d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
+									d['Quantity Planned in Containers'],d['Quantity not Planned in Containers']])
+
 	elif filters.get("foreign_buyer"):
 		for d in data:
-			if d["foreign_buyer_name"] == filters.get("foreign_buyer"):
-				r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
-								d['final_destination'],d['item_name'],d['item_code'],
-								d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
-								d['Quantity Planned in Containers'],d['Quantity not Planned in Containers']])
+
+			if filters.get("show_dispatch_items") == 1:
+				if d["foreign_buyer_name"] == filters.get("foreign_buyer"):
+					r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
+									d['final_destination'],d['item_name'],d['item_code'],
+									d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
+									d['Quantity Planned in Containers'],d['Quantity not Planned in Containers'],
+									d['source_warehouse'], d['warehouse_qty']])
+
+			if filters.get("show_dispatch_items") is None:
+				if d["foreign_buyer_name"] == filters.get("foreign_buyer"):
+					r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
+									d['final_destination'],d['item_name'],d['item_code'],
+									d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
+									d['Quantity Planned in Containers'],d['Quantity not Planned in Containers']])
+
 	elif filters.get("final_destination"):
 		for d in data:
-			if d["final_destination"] == filters.get("final_destination"):
+
+			if filters.get("show_dispatch_items") == 1:
+				if d["final_destination"] == filters.get("final_destination"):
+					r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
+									d['final_destination'],d['item_name'],d['item_code'],
+									d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
+									d['Quantity Planned in Containers'],d['Quantity not Planned in Containers'],
+									d['source_warehouse'], d['warehouse_qty']])
+
+			if filters.get("show_dispatch_items") is None:
+				if d["final_destination"] == filters.get("final_destination"):
+					r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
+									d['final_destination'],d['item_name'],d['item_code'],
+									d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
+									d['Quantity Planned in Containers'],d['Quantity not Planned in Containers']])
+
+	else:
+		for d in data:
+
+			if filters.get("show_dispatch_items") == 1:
+				r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
+								d['final_destination'],d['item_name'],d['item_code'],
+								d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
+								d['Quantity Planned in Containers'],d['Quantity not Planned in Containers'],
+								d['source_warehouse'], d['warehouse_qty']])
+
+			if filters.get("show_dispatch_items") is None:
 				r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
 								d['final_destination'],d['item_name'],d['item_code'],
 								d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
 								d['Quantity Planned in Containers'],d['Quantity not Planned in Containers']])
-	else:
-		for d in data:
-			r_data.append([d['name'],d['po_no'],d['foreign_buyer_name'],
-							d['final_destination'],d['item_name'],d['item_code'],
-							d['pch_pallet_size'],d['qty'],d['delivery_date'].strftime("%d-%m-%y"),
-							d['Quantity Planned in Containers'],d['Quantity not Planned in Containers']])
 	# print(r_data)
 	return r_data
+
+
+
+def add_warehouse_qty(data, filters):
+	source_warehouse = frappe.db.get_single_value("FoundryApp Settings", "production_entry_warehouse")
+
+	if filters.get("show_dispatch_items") == 1:
+		for d in data:
+			warehouse_qty = frappe.db.sql("""select actual_qty
+										from `tabBin`
+										where item_code=%s and warehouse=%s""",
+										(d['item_code'],source_warehouse), as_dict=1)
+			d['source_warehouse'] = source_warehouse
+			# print(warehouse_qty)
+			if len(warehouse_qty) > 0:
+				for wr in warehouse_qty:
+					if wr.actual_qty:
+						d['warehouse_qty'] = wr.actual_qty
+					else:
+						d['warehouse_qty'] = 0
+		# print(data)
+		return data
+
+	return data
 
 def get_columns(filters):
 	"""return columns"""
@@ -187,6 +254,8 @@ def get_columns(filters):
 			("Delivery Date")+"::100",
 			("Quantity Planned in Containers")+"::120",
 			("Quantity not Planned in Containers")+"::130",
+			("Source Warehouse")+"::150",
+			("Quantity in Source Warehouse")+"::70"
 			 ]
 	if filters.get("show_dispatch_items") is None:
 		columns = [
@@ -201,5 +270,7 @@ def get_columns(filters):
 			("Delivery Date")+"::100",
 			("Quantity Planned in Containers")+"::120",
 			("Quantity not Planned in Containers")+"::130",
+			# ("Source Warehouse")+"::150",
+			# ("Quantity in Source Warehouse")+"::70"
 			 ]
 	return columns
