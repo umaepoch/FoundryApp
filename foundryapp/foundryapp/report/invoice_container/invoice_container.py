@@ -53,53 +53,43 @@ def execute(filters=None):
 def fetching_container_details(filters):
 	condition = get_conditions(filters)
 	items_data=[]
-	items = frappe.db.sql("""select  distinct tcc.item,tcc.so_no,
-	tc.foreign_buyer,tcc.parent,
-	tcc.pallet_size,tcc.final_destination,
-	tcc.container_warehouse,
-	tcc.total_quantity_of_item_in_container,
-	tcc.scheduled_date  from `tabContainer Child` as tcc
-	join `tabContainer` as tc on tcc.parent = tc.name %s""" % condition, as_dict=1)
-	print("items",items)
+	dis_items = frappe.db.sql("""select tdi.parent, tc.foreign_buyer, tdi.invoice_item as item, tdi.pallet_size,
+				tc.final_destination, tc.warehouse as container_warehouse, tdi.quantity_planned_in_container as total_quantity_of_item_in_container,
+				tc.scheduled_date, tdi.dispatch_item as dispatch_items, tdi.quantity, ti.stock_uom from `tabDispatch Items` as tdi
+				join `tabContainer` as tc on tdi.parent = tc.name
+				join `tabItem` as ti on tdi.invoice_item = ti.item_code
+				%s
+				order by tdi.invoice_item""" % get_conditions(filters), as_dict = 1)
 
-	for d in items:
-		print("item",d.item)
-		item=d.item
+	for d in dis_items:
 		container_warehouse=d.container_warehouse
-		data=frappe.db.sql("""select tbi.item_code as dispatch_items,ti.stock_uom,
-		tbi.qty,tb.quantity
-		from `tabBOM` as tb join `tabBOM Item` as tbi
-		on tb.name = tbi.parent join `tabItem` as ti
-		on ti.item_code = tbi.item_code where tb.is_default=1 and tbi.docstatus=1 and ti.pch_made=1
-		and tb.item='"""+item+"""' """, as_dict=1)
+		item_code=d.dispatch_items
 
-		for dispatch_items in data:
-			item_code=dispatch_items.dispatch_items
-			print("item_code",item_code)
-			warehouse_qty=frappe.db.sql("""select actual_qty
-			from `tabBin`
-			where item_code='"""+item_code+"""' and warehouse='"""+str(container_warehouse)+"""' """, as_dict=1)
-			print("warehouse_details",len(warehouse_qty))
-			if len(warehouse_qty)!=0:
-				warehouse_qty=warehouse_qty[0]['actual_qty']
-			else:
-				warehouse_qty=0
+		# print("item_code",item_code)
+		warehouse_qty=frappe.db.sql("""select actual_qty
+		from `tabBin`
+		where item_code='"""+item_code+"""' and warehouse='"""+str(container_warehouse)+"""' """, as_dict=1)
+		# print("warehouse_details",len(warehouse_qty))
+		if len(warehouse_qty)!=0:
+			warehouse_qty=warehouse_qty[0]['actual_qty']
+		else:
+			warehouse_qty=0
 
-		for item in data:
-			items_data.append({'parent':d.parent,
-							'foreign_buyer':d.foreign_buyer,
-							'item':d.item,
-							'pch_pallet_size':d.pallet_size,
-							'final_destination':d.final_destination,
-							'container_warehouse':d.container_warehouse,
-							'total_quantity_of_item_in_container':d.total_quantity_of_item_in_container,
-							'scheduled_date':d.scheduled_date,
-							'dispatch_items':item.dispatch_items,
-							'dispatch_item_qty':d.total_quantity_of_item_in_container*item.qty/item.quantity,
-							'dispatch_item_uom':item.stock_uom,
-							'qty_available_in_source_warehouse':warehouse_qty
-							})
-	print("items_data",items_data)
+		items_data.append({'parent':d.parent,
+						'foreign_buyer':d.foreign_buyer,
+						'item':d.item,
+						'pch_pallet_size':d.pallet_size,
+						'final_destination':d.final_destination,
+						'container_warehouse':d.container_warehouse,
+						'total_quantity_of_item_in_container':d.total_quantity_of_item_in_container,
+						'scheduled_date':d.scheduled_date,
+						'dispatch_items':d.dispatch_items,
+						'dispatch_item_qty':d.quantity,
+						'dispatch_item_uom':d.stock_uom,
+						'qty_available_in_source_warehouse':warehouse_qty
+						})
+	# print("items_data",items_data)
+
 	return items_data
 
 @frappe.whitelist()
@@ -108,11 +98,11 @@ def create_invoice_stock_entry_manufacture(filters):
 		print("reached function")
 		data = fetching_container_details(json.loads(filters))
 		company = frappe.db.get_single_value("Global Defaults", "default_company")
-
+		status = False
+		parent = ""
 
 		for sw in data:
-			
-			if (sw['qty_available_in_source_warehouse'] < sw['dispatch_item_qty']) or (sw['qty_available_in_source_warehouse'] < sw['total_quantity_of_item_in_container']):
+			if (sw['qty_available_in_source_warehouse'] < int(sw['dispatch_item_qty'])) or (sw['qty_available_in_source_warehouse'] < sw['total_quantity_of_item_in_container']):
 				frappe.throw("Not Enough Quantity Available in Source Warehouse")
 
 		if data:
@@ -163,55 +153,13 @@ def create_invoice_stock_entry_manufacture(filters):
 						doc_dispatch.save()
 						doc_dispatch.submit()
 
-						if doc_dispatch.docstatus == 1:
-							if (len(doc_dispatch.items) > 0):
-								for i in doc_dispatch.items:
-									cont_doc_invoice = frappe.db.get_value('Container Child',
-									 					{'parent': items['parent'], 'item': i.item_code},
-														['name', 'item','so_no'], as_dict = 1)
-									print("cont_doc_invoice",cont_doc_invoice)
-									# cont_doc_dispatch = frappe.db.get_value('Dispatch Items', {'parent': items['parent'], 'dispatch_item': i.item_code}, 'name')
-									if cont_doc_invoice:
-										inv_doc = frappe.get_doc('Container Child', cont_doc_invoice.name)
-										print("inv_doc",inv_doc)
-										item_json = {
-											'item':cont_doc_invoice.item,
-											'parent': inv_doc.parent,
-											'quantity': i.qty,
-											'sales_order':cont_doc_invoice.so_no
-										}
-										sls_inv_data.append(item_json)
-										
+						parent = items['parent']
+						status = True if doc_dispatch.docstatus == 1 else False
+
 					min_index += 1
 
-			if (len(sls_inv_data) > 0):
-				print("sls_inv_data",sls_inv_data)
-				foreign_buyer_name = frappe.db.get_value('Container', {'name': sls_inv_data[0]['parent']}, 'foreign_buyer')
-				print("foreign_buyer_name",foreign_buyer_name)
-				customer = frappe.db.get_value('Sales Order', {'name': sls_inv_data[0]['sales_order']}, 'customer')
-				print("customer",customer)
-				sls_outer_json = {
-					"customer": customer,
-					"foreign_buyer_name":foreign_buyer_name,
-					"tax_invoice_number":1234,
-					"item_group":"Valve Box",
-					"items": []
-				}
-
-				for s in sls_inv_data:
-					if s:
-						innerJson = {
-							"item_code": s['item'],
-							"qty": s['quantity'],
-							"sales_order":s['sales_order']
-						}
-						sls_outer_json["items"].append(innerJson)
-
-				doc_sales_inv = frappe.new_doc('Sales Invoice')
-				doc_sales_inv.update(sls_outer_json)
-				doc_sales_inv.save()
-
-			return "success!!!!"
+			flag = create_sales_invoice(status, parent)
+			return flag
 	except Exception as ex:
 		print("Exception : ",ex)
 		return "Exception"
@@ -251,3 +199,47 @@ def get_conditions(filters):
 		conditions +='and tc.scheduled_date<= %s' % frappe.db.escape(filters.get("to_scheduled_date"), percent=False)
 	# print("condition",conditions)
 	return conditions
+
+def create_sales_invoice(status, parent):
+	try:
+		print("entered creation sales invoice")
+
+		if status and parent:
+			cont_doc_invoice = frappe.db.get_list('Container Child',filters={'parent': parent}, fields=['name', 'item', 'so_no', 'qty_to_be_filled'], as_list = True)
+			foreign_buyer_name = frappe.db.get_value('Container', {'name': parent}, 'foreign_buyer')
+			customer = frappe.db.get_value('Sales Order', {'name': cont_doc_invoice[0][2]}, 'customer')
+			warehouse = frappe.db.get_value('Container', {'name': parent}, 'warehouse')
+			container = frappe.db.get_value('Container', {'name': parent}, 'name')
+			print("container",container)
+			sls_outer_json = {
+				"customer": customer,
+				"update_stock":1,
+				"set_warehouse":warehouse,
+				"foreign_buyer_name":foreign_buyer_name,
+				"tax_invoice_number":1234,
+				"item_group":"Valve Box",
+				"items": [],
+				"containerdetails":[]
+			}
+			containerdetails = {
+							"container_number":container	
+						}
+			sls_outer_json["containerdetails"].append(containerdetails)
+			for c in cont_doc_invoice:
+				# print(c)
+				innerJson = {
+								"item_code": c[1],
+								"qty": c[3],
+								"sales_order":c[2]
+							}
+				sls_outer_json["items"].append(innerJson)
+
+			if (len(sls_outer_json["items"]) > 0):
+				doc_sales_inv = frappe.new_doc('Sales Invoice')
+				doc_sales_inv.update(sls_outer_json)
+				doc_sales_inv.save()
+
+				return "success!!!!"
+	except Exception as ex:
+		print(ex)
+		return ex
