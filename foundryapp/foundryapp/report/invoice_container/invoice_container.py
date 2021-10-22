@@ -219,9 +219,13 @@ def create_sales_invoice(status, parent):
 				"tax_invoice_number":1234,
 				"item_group":"Valve Box",
 				"container_id_number":container,
-				"items": []	
+				"items": [],
+				"containerdetails":[]
 			}
-			
+			containerdetails = {
+							"container_number":container	
+						}
+			sls_outer_json["containerdetails"].append(containerdetails)
 			for c in cont_doc_invoice:
 				# print(c)
 				innerJson = {
