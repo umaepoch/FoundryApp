@@ -229,9 +229,11 @@ def create_sales_invoice(status, parent):
 				sls_outer_json["items"].append(innerJson)
 
 			if (len(sls_outer_json["items"]) > 0):
+				print("creating sales invoice")
 				doc_sales_inv = frappe.new_doc('Sales Invoice')
 				doc_sales_inv.update(sls_outer_json)
 				doc_sales_inv.save()
+				print("sales invoice created")
 
 				return "success!!!!"
 	except Exception as ex:
