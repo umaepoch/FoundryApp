@@ -209,21 +209,16 @@ def create_sales_invoice(status, parent):
 			foreign_buyer_name = frappe.db.get_value('Container', {'name': parent}, 'foreign_buyer')
 			customer = frappe.db.get_value('Sales Order', {'name': cont_doc_invoice[0][2]}, 'customer')
 			warehouse = frappe.db.get_value('Container', {'name': parent}, 'warehouse')
-			container = frappe.db.get_value('Container', {'name': parent}, 'name')
-			print("container",container)
+
 			sls_outer_json = {
 				"customer": customer,
 				"update_stock":1,
 				"set_warehouse":warehouse,
 				"foreign_buyer_name":foreign_buyer_name,
-				"tax_invoice_number":1234,
-				"item_group":"Valve Box",
-				"container_id_number":container,
+				"container_id_number": parent,
 				"items": []
-				
 			}
-			
-			
+
 			for c in cont_doc_invoice:
 				# print(c)
 				innerJson = {
@@ -242,3 +237,4 @@ def create_sales_invoice(status, parent):
 	except Exception as ex:
 		print(ex)
 		return ex
+
