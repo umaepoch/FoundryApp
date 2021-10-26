@@ -58,7 +58,7 @@ frappe.query_reports["Sales Order Container Planning Report"] = {
 					var final_destination = values.final_destination
 					// var cont = get_new_container(foreign_buyer, final_destination, doc)
 					// console.log("container details : ",cont)
-					frappe.set_route("Form/Container/New Container",{"foreign_buyer": foreign_buyer, "final_destination": final_destination})
+					frappe.set_route("Form/Container/New Container",{"foreign_buyer": foreign_buyer, "final_destination": final_destination, "customer_po_no":customer_po_no})
 					// var msg = check_for_existing(foreign_buyer, final_destination)
 					// if (msg.length > 0) {
 					// 	var existing = ""
