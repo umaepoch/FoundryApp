@@ -56,6 +56,7 @@ frappe.query_reports["Sales Order Container Planning Report"] = {
 					d.hide()
 					var foreign_buyer = values.foreign_buyer
 					var final_destination = values.final_destination
+					var customer_po_no = values.customer_po_number
 					// var cont = get_new_container(foreign_buyer, final_destination, doc)
 					// console.log("container details : ",cont)
 					frappe.set_route("Form/Container/New Container",{"foreign_buyer": foreign_buyer, "final_destination": final_destination, "customer_po_no":customer_po_no})
