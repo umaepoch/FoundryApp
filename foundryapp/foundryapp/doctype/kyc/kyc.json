@@ -1,0 +1,125 @@
+{
+ "creation": "2021-11-17 13:51:39.184896",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "upload_documents_section",
+  "profile",
+  "profile_preview",
+  "adhaar",
+  "adhaar_preview",
+  "pan",
+  "pan_preview",
+  "colbrk2",
+  "profile_url",
+  "adhaar_url",
+  "pan_url",
+  "profile_img",
+  "adhaar_img",
+  "pan_img"
+ ],
+ "fields": [
+  {
+   "fieldname": "profile",
+   "fieldtype": "Button",
+   "label": "Profile"
+  },
+  {
+   "fieldname": "profile_preview",
+   "fieldtype": "HTML",
+   "hidden": 1,
+   "label": "Profile Preview"
+  },
+  {
+   "fieldname": "adhaar",
+   "fieldtype": "Button",
+   "label": "ADHAAR"
+  },
+  {
+   "fieldname": "adhaar_preview",
+   "fieldtype": "HTML",
+   "hidden": 1,
+   "label": "ADHAAR Preview"
+  },
+  {
+   "fieldname": "pan",
+   "fieldtype": "Button",
+   "label": "PAN"
+  },
+  {
+   "fieldname": "pan_preview",
+   "fieldtype": "HTML",
+   "hidden": 1,
+   "label": "PAN Preview"
+  },
+  {
+   "fieldname": "colbrk2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "profile_url",
+   "fieldtype": "Data",
+   "label": "Profile Url",
+   "read_only": 1
+  },
+  {
+   "fieldname": "adhaar_url",
+   "fieldtype": "Data",
+   "label": "ADHAAR Url",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pan_url",
+   "fieldtype": "Data",
+   "label": "PAN Url",
+   "read_only": 1
+  },
+  {
+   "fieldname": "profile_img",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Profile IMG"
+  },
+  {
+   "fieldname": "adhaar_img",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "ADHAAR IMG"
+  },
+  {
+   "fieldname": "pan_img",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "PAN IMG"
+  },
+  {
+   "fieldname": "upload_documents_section",
+   "fieldtype": "Section Break",
+   "label": "Upload Documents"
+  }
+ ],
+ "modified": "2021-11-17 13:58:18.918100",
+ "modified_by": "Administrator",
+ "module": "FoundryApp",
+ "name": "KYC",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
