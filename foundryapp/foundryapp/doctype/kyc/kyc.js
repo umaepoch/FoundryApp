@@ -11,7 +11,7 @@ frappe.ui.form.on('KYC','profile', function(frm, cdt, cdn) {
   capture.submit((data) => {
     let name = doc.name+'_profile'
     let img_ar = data.split(",")
-    create_file(img_ar[1], doc.name, doc.doctype)
+    let file_url = create_file(img_ar[1], doc.name, doc.doctype)
   });
 });
 
@@ -25,7 +25,7 @@ frappe.ui.form.on('KYC','adhaar', function(frm, cdt, cdn) {
   capture.submit((data) => {
     let name = doc.name+'_adhaar'
     let img_ar = data.split(",")
-    create_file(img_ar[1], doc.name, doc.doctype)
+    let file_url = create_file(img_ar[1], doc.name, doc.doctype)
   });
 });
 
