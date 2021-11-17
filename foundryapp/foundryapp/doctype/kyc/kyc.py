@@ -15,7 +15,7 @@ class KYC(Document):
 def create_file(image, doc_name, doctype):
         try:
                 path = frappe.utils.get_site_path()
-                img = base64.b64decode(file)
+                img = base64.b64decode(image)
 #               with open(path+"/public/files/sample.png", "wb") as fh:
 #                       fh.write(img)
 #               doc = frappe.new_doc("File")
