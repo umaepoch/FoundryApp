@@ -24,7 +24,7 @@ def create_file(image, doc_name, doctype):
 #               doc.attached_to_doctype = "Port Mapping"
 #               doc.file_url    = "/files/sample.png"
 #               doc.save()
-                sf = save_file(doc_name+".png", image, doctype, doc_name)
+                sf = save_file(doc_name+".png", img, doctype, doc_name)
                 return {"SC":sf.file_url}
         except Exception as ex:
                 return{"EX":ex}

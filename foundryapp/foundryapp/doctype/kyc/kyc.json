@@ -1,9 +1,12 @@
 {
+ "autoname": "naming_series:",
  "creation": "2021-11-17 13:51:39.184896",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
+  "user_name",
   "upload_documents_section",
   "profile",
   "profile_preview",
@@ -97,9 +100,22 @@
    "fieldname": "upload_documents_section",
    "fieldtype": "Section Break",
    "label": "Upload Documents"
+  },
+  {
+   "fieldname": "user_name",
+   "fieldtype": "Data",
+   "label": "User Name"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "KYC NO",
+   "options": "KYC-",
+   "reqd": 1
   }
  ],
- "modified": "2021-11-17 13:58:18.918100",
+ "modified": "2021-11-17 18:34:37.183098",
  "modified_by": "Administrator",
  "module": "FoundryApp",
  "name": "KYC",
