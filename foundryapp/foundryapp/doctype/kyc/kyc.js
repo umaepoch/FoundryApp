@@ -1,70 +1,72 @@
 // Copyright (c) 2021, yashwanth and contributors
 // For license information, please see license.txt
-var image = {}
+
+let images = {}
 
 frappe.ui.form.on('KYC','profile', function(frm, cdt, cdn) {
   var doc = locals[cdt][cdn]
   const capture = new frappe.ui.Capture()
-  // opens the camera module api.
-  // if (doc.__unsaved === 1) {
-  //   if (doc.user_name) {
-  //     cur_frm.save()
-  //   } else {
-  //     frappe.throw(__("Please enter the User Name"))
-  //   }
-  // }
+
   capture.show()
   // captures the image.
   capture.submit((data) => {
     let name = doc.name+'_profile'
     let img_ar = data.split(",")
-    image.profile = img_ar[1]
-    // create_file(img_ar[1], doc.name, doc.doctype)
+    images.profile = img_ar[1]
   });
-  console.log(image)
 });
 
 frappe.ui.form.on('KYC','adhaar', function(frm, cdt, cdn) {
   var doc = locals[cdt][cdn]
   const capture = new frappe.ui.Capture()
-  // opens the camera module api.
+  opens the camera module api.
   capture.show()
 
   // captures the image.
   capture.submit((data) => {
     let name = doc.name+'_adhaar'
     let img_ar = data.split(",")
-    image.adhaar = img_ar[1]
-    // create_file(img_ar[1], doc.name, doc.doctype)
+    images.adhaar = img_ar[1]
   });
-  console.log(image)
 });
 
 frappe.ui.form.on('KYC','pan', function(frm, cdt, cdn) {
   var doc = locals[cdt][cdn]
   const capture = new frappe.ui.Capture()
-  // opens the camera module api.
+  opens the camera module api.
   capture.show()
 
   // captures the image.
   capture.submit((data) => {
     let name = doc.name+'_pan'
     let img_ar = data.split(",")
-    image.pan = img_ar[1]
-    // let file_url = create_file(img_ar[1], doc.name, doc.doctype)
+    images.pan = img_ar[1]
   });
-  console.log(image)
 });
 
 
-function create_file(img, name, doc_type) {
+frappe.ui.form.on("KYC", "after_save", function(frm, cdt, cdn) {
+  var doc = locals[cdt][cdn]
+  var kyc = {
+    "name": doc.name,
+    "type": doc.doctype,
+    "images": images
+  }
+  console.log(kyc)
+  var file_url = create_file(JSON.stringify(kyc))
+  if (file_url) {
+    // cur_frm.set_value("profile_url", file_url[])
+    console.log(file_url)
+    // frm.reload_doc()
+  }
+})
+
+function create_file(doc) {
   let url;
   frappe.call({
     method: 'foundryapp.foundryapp.doctype.kyc.kyc.create_file',
     args: {
-      'image': img,
-      'doc_name': name,
-      'doctype': doc_type
+      'doc': doc
     },
     async: false,
     callback: function(r) {
@@ -74,7 +76,7 @@ function create_file(img, name, doc_type) {
         }
         if (r.message.SC) {
           console.log(r.message.SC)
-          url = r.message.url
+          url = r.message.SC
         }
       }
     }
@@ -82,13 +84,16 @@ function create_file(img, name, doc_type) {
   return url
 }
 
-frappe.ui.form.on("KYC", "after_save", function(frm, cdt, cdn) {
-  var doc = locals[cdt][cdn]
-  console.log(doc)
-})
-
 // frappe.ui.form.on("KYC", "before_save", function(frm, cdt, cdn){
-//   cur_frm.set_value("profile_url", "/files/profile_url");
-//   cur_frm.set_value("adhaar_url", "/files/adhaar_url");
-//   cur_frm.set_value("pan_url", "/files/pan_url");
+//   // cur_frm.set_value("profile_url", "/files/profile_url");
+//   // cur_frm.set_value("adhaar_url", "/files/adhaar_url");
+//   // cur_frm.set_value("pan_url", "/files/pan_url");
+//   cur_frm.set_value("profile_preview", "");
+// })
+
+// frappe.ui.form.on("KYC", "refresh", function(frm, cdt, cdn) {
+//   var img = new Image()
+//   img.src = data
+//   console.log($('.profile_preview'))
+//   $('.profile_preview').html(`<img src=${img.src}>`)
 // })
