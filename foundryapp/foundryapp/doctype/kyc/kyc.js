@@ -131,3 +131,21 @@ frappe.ui.form.on("KYC", "validate", function(frm, cdt, cdn) {
 //   console.log($('.profile_preview'))
 //   $('.profile_preview').html(`<img src=${img.src}>`)
 // })
+
+frappe.ui.form.on("KYC", "refresh", function(frm, cdt, cdn) {
+  // var img = new Image()
+  // img.src = data
+  var temp = "<img src={%data%}>"
+  if (images.profile) {
+    frm.set_df_property("profile_preview", 'options', frappe.render(temp,{data:images.profile}))
+    frm.refresh_field("profile_preview")
+  }
+  if (images.adhaar) {
+    frm.set_df_property("adhaar_preview", 'options', frappe.render(temp,{data:images.adhaar}))
+    frm.refresh_field("adhaar_preview")
+  }
+  if (images.pan) {
+    frm.set_df_property("pan_preview", 'options', frappe.render(temp,{data:images.pan}))
+    frm.refresh_field("pan_preview")
+  }
+})
