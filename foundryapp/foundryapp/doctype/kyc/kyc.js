@@ -19,7 +19,7 @@ frappe.ui.form.on('KYC','profile', function(frm, cdt, cdn) {
 frappe.ui.form.on('KYC','adhaar', function(frm, cdt, cdn) {
   var doc = locals[cdt][cdn]
   const capture = new frappe.ui.Capture()
-  opens the camera module api.
+  // opens the camera module api.
   capture.show()
 
   // captures the image.
@@ -33,7 +33,7 @@ frappe.ui.form.on('KYC','adhaar', function(frm, cdt, cdn) {
 frappe.ui.form.on('KYC','pan', function(frm, cdt, cdn) {
   var doc = locals[cdt][cdn]
   const capture = new frappe.ui.Capture()
-  opens the camera module api.
+  // opens the camera module api.
   capture.show()
 
   // captures the image.

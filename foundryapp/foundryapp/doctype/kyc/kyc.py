@@ -19,19 +19,20 @@ def create_file(doc):
 		kyc = json.loads(doc)
 		doc_name = kyc['name']
 		doctype = kyc['type']
+
 		for img in kyc['images']:
-			# i = base64.b64decode(value)
 			if "profile" in img.keys():
+				i = base64.b64decode(img['profile'])
 				sf = save_file(doc_name+".png", i, doctype, doc_name)
-				data[key] = sf.file_url
+				data['profile'] = sf.file_url
 			if "adhaar" in img.keys():
-				print(doc_name)
+				i = base64.b64decode(img['adhaar'])
 				sf = save_file(doc_name+".png", i, doctype, doc_name)
-				data[key] = sf.file_url
+				data['adhaar'] = sf.file_url
 			if "pan" in img.keys():
-				print(doc_name)
+				i = base64.b64decode(img['pan'])
 				sf = save_file(doc_name+".png", i, doctype, doc_name)
-				data[key] = sf.file_url
+				data['pan'] = sf.file_url
 
 		return {"SC":data}
 	except Exception as ex:
